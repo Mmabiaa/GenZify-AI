@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "./ThemeToggle";
 import { Menu, X, ChevronDown } from "lucide-react";
+import UserMenu from "./UserMenu";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => (
   <Link
@@ -62,6 +64,7 @@ const DropdownMenu = ({
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
   
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -92,14 +95,12 @@ export default function Navbar() {
             <Link to="/voice" className="px-4 py-2 hover:bg-foreground/10">Voice AI</Link>
           </DropdownMenu>
           
-          <NavLink to="/dashboard">Dashboard</NavLink>
+          {isAuthenticated && <NavLink to="/dashboard">Dashboard</NavLink>}
           <NavLink to="/about">About</NavLink>
           
           <div className="flex items-center gap-4 pl-4 border-l border-border">
             <ThemeToggle />
-            <Button asChild variant="default" className="bg-primary hover:bg-primary/90">
-              <Link to="/login">Sign In</Link>
-            </Button>
+            <UserMenu />
           </div>
         </div>
         
@@ -137,17 +138,25 @@ export default function Navbar() {
               Voice AI
             </MobileNavLink>
             <div className="border-t border-border my-2"></div>
-            <MobileNavLink to="/dashboard" onClick={closeMobileMenu}>
-              Dashboard
-            </MobileNavLink>
+            {isAuthenticated && (
+              <MobileNavLink to="/dashboard" onClick={closeMobileMenu}>
+                Dashboard
+              </MobileNavLink>
+            )}
             <MobileNavLink to="/about" onClick={closeMobileMenu}>
               About
             </MobileNavLink>
             <div className="border-t border-border my-2"></div>
             <div className="px-4 py-2">
-              <Button asChild className="w-full bg-primary hover:bg-primary/90">
-                <Link to="/login">Sign In</Link>
-              </Button>
+              {!isAuthenticated ? (
+                <Button asChild className="w-full bg-primary hover:bg-primary/90">
+                  <Link to="/login">Sign In</Link>
+                </Button>
+              ) : (
+                <div className="flex justify-center">
+                  <UserMenu />
+                </div>
+              )}
             </div>
           </div>
         </div>

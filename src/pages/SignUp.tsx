@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, Github, Chrome, AtSign, Lock } from "lucide-react";
+import { AtSign, Lock, User, Github, Chrome, UserPlus } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { z } from "zod";
@@ -21,53 +21,59 @@ import {
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const loginSchema = z.object({
+const signUpSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  password: z.string().min(1, {
-    message: "Password is required.",
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
   }),
-  remember: z.boolean().optional(),
+  terms: z.boolean().refine(val => val === true, {
+    message: "You must accept the terms and conditions.",
+  }),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type SignUpFormValues = z.infer<typeof signUpSchema>;
 
-export default function Login() {
+export default function SignUp() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { login, loginWithGoogle, loginWithGithub } = useAuth();
+  const { signUp, loginWithGoogle, loginWithGithub } = useAuth();
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
-      remember: false,
+      terms: false,
     },
   });
 
-  async function onSubmit(data: LoginFormValues) {
+  async function onSubmit(data: SignUpFormValues) {
     try {
-      await login(data.email, data.password);
+      await signUp(data.name, data.email, data.password);
       
       toast({
-        title: "Login successful",
-        description: "Welcome back to GenZify!",
+        title: "Account created",
+        description: `Welcome, ${data.name}! Your account has been created.`,
       });
       
-      // Navigate to dashboard after successful login
+      // Navigate to dashboard after successful signup
       navigate("/dashboard");
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: "Invalid email or password.",
+        title: "Sign up failed",
+        description: "There was a problem creating your account.",
         variant: "destructive",
       });
     }
   }
 
-  const handleSocialLogin = async (provider: string) => {
+  const handleSocialSignUp = async (provider: string) => {
     try {
       if (provider === "Google") {
         await loginWithGoogle();
@@ -76,7 +82,7 @@ export default function Login() {
       }
       
       toast({
-        title: "Login successful",
+        title: "Account created",
         description: `Welcome to GenZify! You are now signed in with ${provider}.`,
       });
       
@@ -97,14 +103,35 @@ export default function Login() {
       <main className="flex-1 flex items-center justify-center py-12">
         <div className="w-full max-w-md p-8 space-y-8 bg-background border border-border rounded-xl shadow-sm">
           <div className="text-center">
-            <h1 className="text-2xl font-bold">Welcome back</h1>
+            <h1 className="text-2xl font-bold">Create an account</h1>
             <p className="text-sm text-foreground/70 mt-2">
-              Sign in to your account to continue
+              Sign up to access all GenZify AI features
             </p>
           </div>
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="absolute left-3 top-2.5 h-5 w-5 text-foreground/50" />
+                        <Input
+                          placeholder="Your name"
+                          className="pl-10"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <FormField
                 control={form.control}
                 name="email"
@@ -115,7 +142,7 @@ export default function Login() {
                       <div className="relative">
                         <AtSign className="absolute left-3 top-2.5 h-5 w-5 text-foreground/50" />
                         <Input
-                          placeholder="your@email.com"
+                          placeholder="you@example.com"
                           type="email"
                           className="pl-10"
                           {...field}
@@ -132,12 +159,7 @@ export default function Login() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
-                      <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-                        Forgot password?
-                      </Link>
-                    </div>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Lock className="absolute left-3 top-2.5 h-5 w-5 text-foreground/50" />
@@ -156,7 +178,7 @@ export default function Login() {
               
               <FormField
                 control={form.control}
-                name="remember"
+                name="terms"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
                     <FormControl>
@@ -167,15 +189,16 @@ export default function Login() {
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-sm font-normal">
-                        Remember me for 30 days
+                        I accept the <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                       </FormLabel>
+                      <FormMessage />
                     </div>
                   </FormItem>
                 )}
               />
               
               <Button type="submit" className="w-full">
-                <LogIn className="w-4 h-4 mr-2" /> Sign In
+                <UserPlus className="w-4 h-4 mr-2" /> Create Account
               </Button>
             </form>
           </Form>
@@ -190,18 +213,18 @@ export default function Login() {
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" type="button" onClick={() => handleSocialLogin("Google")} className="w-full">
+            <Button variant="outline" type="button" onClick={() => handleSocialSignUp("Google")} className="w-full">
               <Chrome className="w-4 h-4 mr-2" /> Google
             </Button>
-            <Button variant="outline" type="button" onClick={() => handleSocialLogin("GitHub")} className="w-full">
+            <Button variant="outline" type="button" onClick={() => handleSocialSignUp("GitHub")} className="w-full">
               <Github className="w-4 h-4 mr-2" /> GitHub
             </Button>
           </div>
           
           <div className="text-center text-sm">
-            <span className="text-foreground/70">Don't have an account?</span>{" "}
-            <Link to="/signup" className="text-primary hover:underline font-medium">
-              Sign up
+            <span className="text-foreground/70">Already have an account?</span>{" "}
+            <Link to="/login" className="text-primary hover:underline font-medium">
+              Sign in
             </Link>
           </div>
         </div>
