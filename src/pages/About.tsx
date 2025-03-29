@@ -76,7 +76,7 @@ export default function About() {
               <div>
                 <h2 className="text-3xl font-bold mb-6">Our Story</h2>
                 <p className="text-lg text-foreground/80 mb-6">
-                  GenZify was founded in 2023 by a team of AI researchers, engineers, and designers who were frustrated by the gap between cutting-edge AI research and accessible, user-friendly tools.
+                  GenZify was founded in 2025 by Tech-By-Mmabiaa together with a team of AI researchers, engineers, and designers who were frustrated by the gap between cutting-edge AI research and accessible, user-friendly tools.
                 </p>
                 <p className="text-lg text-foreground/80 mb-6">
                   We saw how generative AI was transforming industries, but noticed that many powerful tools were either too complex for everyday users or too limited in their capabilities.
