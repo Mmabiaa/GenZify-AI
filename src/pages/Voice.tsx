@@ -1,144 +1,144 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Volume2, Pause, Play, Loader2, Download } from "lucide-react";
+import { Volume2, Play, Download, Pause, Loader2, RotateCcw } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-interface Voice {
-  id: string;
-  name: string;
-  gender: string;
-}
-
-const voices: Voice[] = [
-  { id: "v1", name: "Alex", gender: "Male" },
-  { id: "v2", name: "Emily", gender: "Female" },
-  { id: "v3", name: "Jason", gender: "Male" },
-  { id: "v4", name: "Sophie", gender: "Female" },
-  { id: "v5", name: "Michael", gender: "Male" }
-];
-
 export default function Voice() {
   const [text, setText] = useState("");
-  const [selectedVoice, setSelectedVoice] = useState<string>("v1");
-  const [stability, setStability] = useState([80]);
-  const [clarity, setClarity] = useState([75]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
+  const [voice, setVoice] = useState("emma");
+  const [stability, setStability] = useState([75]);
+  const [clarity, setClarity] = useState([85]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
-
-  const handleGenerate = () => {
-    if (!text) {
+  
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!text.trim()) {
       toast({
-        title: "Text required",
-        description: "Please enter text to convert to speech.",
+        title: "Empty text",
+        description: "Please enter text to generate voice.",
         variant: "destructive",
       });
       return;
     }
-
+    
     setIsGenerating(true);
-    setAudioUrl(null);
-
-    // Simulate voice generation
+    
+    // Simulate generation delay
     setTimeout(() => {
-      // In a real implementation, this would be the URL returned from the ElevenLabs API
-      setAudioUrl("https://audio-samples.github.io/samples/mp3/blizzard_biased/sample-4.mp3");
+      // In a production app, this would call an actual TTS API
+      // For demo purposes, we're using a sample MP3
+      setGeneratedAudio("https://audio-samples.github.io/samples/mp3/blizzard_biased/sample-4.mp3");
       setIsGenerating(false);
-
+      
       toast({
         title: "Voice generated",
         description: "Your text has been converted to speech.",
       });
-    }, 3000);
+    }, 2000);
   };
-
-  const togglePlayback = () => {
-    const audioElement = document.getElementById("audio-player") as HTMLAudioElement;
-    if (isPlaying) {
-      audioElement.pause();
-    } else {
-      audioElement.play();
+  
+  const handlePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
     }
-    setIsPlaying(!isPlaying);
   };
-
+  
   const handleAudioEnded = () => {
     setIsPlaying(false);
   };
-
+  
+  const handleReset = () => {
+    setText("");
+    setGeneratedAudio(null);
+    setIsPlaying(false);
+    setVoice("emma");
+    setStability([75]);
+    setClarity([85]);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+  
   const handleDownload = () => {
-    if (!audioUrl) return;
-
+    if (!generatedAudio) return;
+    
+    // Create an anchor element and set properties for download
     const link = document.createElement("a");
-    link.href = audioUrl;
+    link.href = generatedAudio;
     link.download = "generated-voice.mp3";
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-
+    
     toast({
-      title: "Audio downloaded",
-      description: "Your generated voice has been downloaded.",
+      title: "Download started",
+      description: "Your audio file is being downloaded.",
     });
   };
-
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-
+      
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">AI Voice Generator</h1>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div className="bg-background border border-border rounded-lg p-6">
-                <h2 className="text-lg font-medium mb-4">Text to Speech</h2>
-
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="text-input">Text to Convert</Label>
-                    <Textarea
-                      id="text-input"
-                      placeholder="Enter the text you want to convert to speech..."
-                      className="mt-1"
-                      rows={6}
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="voice-select">Voice</Label>
-                    <Select
-                      value={selectedVoice}
-                      onValueChange={setSelectedVoice}
-                    >
-                      <SelectTrigger id="voice-select" className="mt-1">
-                        <SelectValue placeholder="Select a voice" />
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold">AI Voice Generator</h1>
+          </div>
+          
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Text to Speech</CardTitle>
+              <CardDescription>
+                Convert your text into natural-sounding speech
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <form onSubmit={handleGenerate} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="voice">Select Voice</Label>
+                    <Select value={voice} onValueChange={setVoice}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select voice" />
                       </SelectTrigger>
                       <SelectContent>
-                        {voices.map((voice) => (
-                          <SelectItem key={voice.id} value={voice.id}>
-                            {voice.name} ({voice.gender})
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="emma">Emma (Female, US)</SelectItem>
+                        <SelectItem value="jackson">Jackson (Male, US)</SelectItem>
+                        <SelectItem value="olivia">Olivia (Female, UK)</SelectItem>
+                        <SelectItem value="noah">Noah (Male, UK)</SelectItem>
+                        <SelectItem value="yuki">Yuki (Female, JP)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div>
-                    <div className="flex justify-between mb-2">
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
                       <Label htmlFor="stability">Stability</Label>
-                      <span className="text-sm text-foreground/70">{stability[0]}%</span>
+                      <span className="text-sm text-muted-foreground">{stability[0]}%</span>
                     </div>
                     <Slider
                       id="stability"
@@ -148,15 +148,10 @@ export default function Voice() {
                       value={stability}
                       onValueChange={setStability}
                     />
-                    <p className="text-xs text-foreground/50 mt-1">
-                      Higher stability makes the voice more consistent but less expressive.
-                    </p>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <Label htmlFor="clarity">Clarity + Similarity</Label>
-                      <span className="text-sm text-foreground/70">{clarity[0]}%</span>
+                    
+                    <div className="flex justify-between">
+                      <Label htmlFor="clarity">Clarity & Enhancement</Label>
+                      <span className="text-sm text-muted-foreground">{clarity[0]}%</span>
                     </div>
                     <Slider
                       id="clarity"
@@ -166,116 +161,124 @@ export default function Voice() {
                       value={clarity}
                       onValueChange={setClarity}
                     />
-                    <p className="text-xs text-foreground/50 mt-1">
-                      Adjust how closely the output matches the selected voice.
-                    </p>
                   </div>
-
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="text">Text to Convert</Label>
+                  <Textarea
+                    id="text"
+                    placeholder="Enter the text you want to convert to speech..."
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    className="min-h-[150px]"
+                  />
+                </div>
+                
+                <div className="flex space-x-2">
                   <Button
-                    onClick={handleGenerate}
-                    className="w-full"
-                    disabled={!text || isGenerating}
+                    type="submit"
+                    className="flex-1"
+                    disabled={isGenerating || !text.trim()}
                   >
                     {isGenerating ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating Voice...
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating
                       </>
                     ) : (
                       <>
-                        <Volume2 className="mr-2 h-4 w-4" />
-                        Generate Voice
+                        <Volume2 className="mr-2 h-4 w-4" /> Generate Voice
                       </>
                     )}
                   </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleReset}
+                    disabled={isGenerating}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
                 </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="bg-background border border-border rounded-lg p-6 h-full flex flex-col">
-                <h2 className="text-lg font-medium mb-4">Voice Preview</h2>
-
-                {isGenerating ? (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-                      <p className="mt-4">Converting text to speech...</p>
-                      <p className="text-sm text-foreground/70 mt-2">
-                        Powered by ElevenLabs AI
-                      </p>
-                    </div>
+              </form>
+            </CardContent>
+          </Card>
+          
+          {generatedAudio && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Generated Audio</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <audio 
+                  ref={audioRef} 
+                  src={generatedAudio} 
+                  onEnded={handleAudioEnded} 
+                  className="w-full" 
+                />
+                
+                <div className="bg-muted rounded-md p-4 mt-4">
+                  <p className="text-sm text-center italic">
+                    "{text.length > 100 ? text.slice(0, 100) + "..." : text}"
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePlay}
+                >
+                  {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </Button>
+                <Button onClick={handleDownload}>
+                  <Download className="mr-2 h-4 w-4" /> Download Audio
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+          
+          <div className="mt-12">
+            <Card>
+              <CardHeader>
+                <CardTitle>Voice Technology</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-6 sm:grid-cols-3">
+                <div className="flex flex-col items-center text-center p-4">
+                  <div className="bg-primary/10 p-3 rounded-full mb-4">
+                    <Volume2 className="h-6 w-6 text-primary" />
                   </div>
-                ) : audioUrl ? (
-                  <div className="flex-1 flex flex-col">
-                    <div className="flex-1 mb-6">
-                      <div className="bg-muted/30 p-4 rounded-lg border border-border">
-                        <p className="text-sm whitespace-pre-wrap">{text}</p>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-border pt-4 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={togglePlayback}
-                            className="mr-2"
-                          >
-                            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                          </Button>
-                          <span className="text-sm font-medium">
-                            {voices.find((v) => v.id === selectedVoice)?.name || "Voice"} Preview
-                          </span>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={handleDownload}>
-                          <Download className="h-4 w-4 mr-1" /> Download
-                        </Button>
-                      </div>
-
-                      <audio
-                        id="audio-player"
-                        src={audioUrl}
-                        onEnded={handleAudioEnded}
-                        className="w-full"
-                        controls
-                        hidden
-                      />
-
-                      <div className="animate-pulse flex justify-center">
-                        <div className="flex items-center gap-1 h-8">
-                          {Array.from({ length: 20 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className={`w-1 bg-primary/60 rounded-full`}
-                              style={{
-                                height: `${Math.max(5, Math.random() * 32)}px`,
-                                opacity: isPlaying ? 1 : 0.4,
-                              }}
-                            ></div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                  <h3 className="font-medium mb-2">Natural Voices</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Ultra-realistic voices with human-like intonation and rhythm
+                  </p>
+                </div>
+                
+                <div className="flex flex-col items-center text-center p-4">
+                  <div className="bg-primary/10 p-3 rounded-full mb-4">
+                    <Volume2 className="h-6 w-6 text-primary" />
                   </div>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center text-center">
-                    <div>
-                      <Volume2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-lg font-medium">No Audio Generated Yet</p>
-                      <p className="text-sm max-w-xs mx-auto mt-2">
-                        Enter your text and click "Generate Voice" to create lifelike speech.
-                      </p>
-                    </div>
+                  <h3 className="font-medium mb-2">Multi-language</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Support for over 20 languages and multiple regional accents
+                  </p>
+                </div>
+                
+                <div className="flex flex-col items-center text-center p-4">
+                  <div className="bg-primary/10 p-3 rounded-full mb-4">
+                    <Volume2 className="h-6 w-6 text-primary" />
                   </div>
-                )}
-              </div>
-            </div>
+                  <h3 className="font-medium mb-2">Custom Voices</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Create and customize voices to match your specific needs
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
-
+      
       <Footer />
     </div>
   );

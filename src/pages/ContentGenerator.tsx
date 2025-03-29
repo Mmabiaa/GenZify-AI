@@ -3,29 +3,39 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Copy, Download, Wand2 } from "lucide-react";
+import { Sparkles, Copy, FileText, Loader2, ImagePlus, Music, Code, RotateCcw } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-type ContentType = "blog" | "social" | "email" | "ad" | "story";
+type ContentType = "text" | "image" | "code";
 
 export default function ContentGenerator() {
   const [prompt, setPrompt] = useState("");
-  const [contentType, setContentType] = useState<ContentType>("blog");
-  const [tone, setTone] = useState("professional");
-  const [length, setLength] = useState([500]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [contentType, setContentType] = useState<ContentType>("text");
+  const [tone, setTone] = useState("professional");
+  const [creativity, setCreativity] = useState([50]);
   const { toast } = useToast();
   
-  const handleGenerate = () => {
-    if (!prompt) {
+  const generateContent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!prompt.trim()) {
       toast({
-        title: "Prompt required",
+        title: "Empty prompt",
         description: "Please enter a prompt to generate content.",
         variant: "destructive",
       });
@@ -33,29 +43,40 @@ export default function ContentGenerator() {
     }
     
     setIsGenerating(true);
-    setGeneratedContent("");
     
-    // Simulate content generation
+    // Simulate generation delay
     setTimeout(() => {
-      const contentTemplates = {
-        blog: `# ${prompt}\n\n## Introduction\nIn today's fast-paced digital landscape, understanding ${prompt} has become increasingly important for businesses and individuals alike.\n\n## Key Points\n1. The evolution of ${prompt} in recent years\n2. How ${prompt} impacts everyday operations\n3. Strategies for optimizing your approach to ${prompt}\n\n## Best Practices\nWhen considering ${prompt}, it's essential to maintain a strategic perspective. Industry leaders recommend focusing on metrics that truly matter rather than getting lost in vanity data points.\n\n## Conclusion\nAs we've explored throughout this article, ${prompt} represents both challenges and opportunities. By taking a methodical approach and staying informed on industry trends, you'll be well-positioned to leverage this knowledge for future success.`,
-        social: `✨ Just dropping some knowledge about ${prompt} ✨\n\nDid you know? The most successful approaches to ${prompt} focus on three key elements:\n\n1️⃣ Strategic planning\n2️⃣ Consistent execution\n3️⃣ Data-driven refinement\n\nComment below with your experience on ${prompt}! Let's start a conversation. 👇\n\n#TrendingNow #${prompt.replace(/\s+/g, '')} #GenZTips`,
-        email: `Subject: Important Updates Regarding ${prompt}\n\nDear Valued Partner,\n\nI hope this email finds you well. I wanted to reach out personally regarding our recent developments with ${prompt}.\n\nOur team has been working diligently to enhance our approach to ${prompt}, and I'm pleased to share some exciting updates with you.\n\nIn the coming weeks, we'll be rolling out new features designed to optimize your experience with ${prompt}. These improvements are based directly on feedback we've received from partners like you.\n\nPlease let me know if you have any questions or would like to schedule a call to discuss these changes in more detail.\n\nBest regards,\n[Your Name]`,
-        ad: `**INTRODUCING: Revolutionary Approach to ${prompt}**\n\n🔥 TRANSFORM how you handle ${prompt} forever\n🔥 SAVE hours of time and resources\n🔥 BOOST your results by up to 300%\n\nDon't miss out on the opportunity to revolutionize your approach to ${prompt}. Early adopters are seeing unprecedented results!\n\nClick now to learn more. Limited time offer available!`,
-        story: `The sun was setting over the city skyline as Alex pondered the complexities of ${prompt}. It had been three years since the concept first emerged, yet the implications were still unfolding in ways nobody had predicted.\n\n"You're overthinking it again," said Jordan, sliding a coffee across the table.\n\n"Maybe," Alex replied, "but ${prompt} isn't just another trend. It's changing everything about how we operate."\n\nJordan smiled knowingly. They'd had this conversation before, but this time felt different. The recent developments in ${prompt} had caught everyone off guard.\n\n"Remember what Professor Chen always said?" Jordan asked. "'In complexity lies opportunity.'\n\nAlex nodded slowly, a new perspective beginning to form. Perhaps the challenge of ${prompt} wasn't an obstacle but a doorway to something greater.`
-      };
+      let result = "";
       
-      setGeneratedContent(contentTemplates[contentType]);
+      if (contentType === "text") {
+        const toneMapping = {
+          professional: "This is a professionally generated text based on your prompt. It is clear, concise, and uses industry-standard terminology appropriate for business contexts.",
+          casual: "Hey there! Here's a casual take on what you asked for. It's friendly, conversational, and pretty relaxed overall.",
+          enthusiastic: "WOW! I'm SUPER excited to share this AMAZING content with you! It's full of energy and enthusiasm that will definitely grab attention!",
+          formal: "Herein lies a formal response to your query, characterized by sophisticated language, proper structure, and a distinct lack of colloquialisms.",
+          humorous: "Why did the AI cross the road? To get to the other algorithm! Jokes aside (or not), here's a funny take on your request that should give you a chuckle."
+        };
+        
+        result = `${toneMapping[tone as keyof typeof toneMapping]}\n\n`;
+        result += `Your prompt was about "${prompt}", and this response is generated with ${creativity[0]}% creativity level. In a production environment, this would be generated by an actual AI model.`;
+      } else if (contentType === "image") {
+        result = "Image generation is simulated in this demo. In a production environment, this would connect to an image generation API like DALL-E or Midjourney to create images based on your prompt.";
+      } else if (contentType === "code") {
+        result = `// Generated code sample based on prompt: ${prompt}\n\n`;
+        result += `function generateSolution() {\n  // This is a simulated code response\n  // In production, this would be generated by an actual AI model\n  console.log("Implementing solution for: ${prompt}");\n  \n  // Your implementation would go here\n  return "Solution implemented with ${creativity[0]}% creativity";\n}\n\n// Call the function\ngenerateSolution();`;
+      }
+      
+      setGeneratedContent(result);
       setIsGenerating(false);
       
       toast({
         title: "Content generated",
-        description: "Your content has been successfully generated.",
+        description: "Your content has been generated successfully.",
       });
-    }, 3000);
+    }, 2000);
   };
   
-  const handleCopy = () => {
+  const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(generatedContent);
     toast({
       title: "Copied to clipboard",
@@ -63,19 +84,11 @@ export default function ContentGenerator() {
     });
   };
   
-  const handleDownload = () => {
-    const element = document.createElement("a");
-    const file = new Blob([generatedContent], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = `generated-content-${new Date().toISOString().slice(0, 10)}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-    
-    toast({
-      title: "Content downloaded",
-      description: "Your content has been downloaded as a text file.",
-    });
+  const handleReset = () => {
+    setPrompt("");
+    setGeneratedContent("");
+    setTone("professional");
+    setCreativity([50]);
   };
   
   return (
@@ -83,139 +96,206 @@ export default function ContentGenerator() {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">AI Content Generator</h1>
+        <div className="max-w-5xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold">AI Content Generator</h1>
+          </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-1 space-y-6">
-              <div className="bg-background border border-border rounded-lg p-6">
-                <h2 className="text-lg font-medium mb-4">Generation Settings</h2>
-                
-                <div className="space-y-4">
-                  <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="md:col-span-1">
+              <CardHeader>
+                <CardTitle>Content Settings</CardTitle>
+                <CardDescription>Configure your content generation preferences</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={generateContent} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="content-type">Content Type</Label>
+                    <Tabs 
+                      value={contentType} 
+                      onValueChange={(value) => setContentType(value as ContentType)} 
+                      className="w-full"
+                    >
+                      <TabsList className="grid grid-cols-3 w-full">
+                        <TabsTrigger value="text" className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" /> Text
+                        </TabsTrigger>
+                        <TabsTrigger value="image" className="flex items-center gap-2">
+                          <ImagePlus className="h-4 w-4" /> Image
+                        </TabsTrigger>
+                        <TabsTrigger value="code" className="flex items-center gap-2">
+                          <Code className="h-4 w-4" /> Code
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                  
+                  {contentType === "text" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="tone">Tone</Label>
+                      <Select value={tone} onValueChange={setTone}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select tone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="professional">Professional</SelectItem>
+                          <SelectItem value="casual">Casual</SelectItem>
+                          <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
+                          <SelectItem value="formal">Formal</SelectItem>
+                          <SelectItem value="humorous">Humorous</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <Label htmlFor="creativity">Creativity</Label>
+                      <span className="text-sm text-muted-foreground">{creativity[0]}%</span>
+                    </div>
+                    <Slider
+                      id="creativity"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={creativity}
+                      onValueChange={setCreativity}
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Precise</span>
+                      <span>Balanced</span>
+                      <span>Creative</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
                     <Label htmlFor="prompt">Your Prompt</Label>
                     <Textarea
                       id="prompt"
-                      placeholder="Describe the content you want to generate..."
-                      className="mt-1"
-                      rows={5}
+                      placeholder={
+                        contentType === "text"
+                          ? "Enter a prompt for text generation..."
+                          : contentType === "image"
+                          ? "Describe the image you want to generate..."
+                          : "Describe the code you want to generate..."
+                      }
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
+                      className="min-h-[100px]"
                     />
                   </div>
                   
-                  <div>
-                    <Label htmlFor="content-type">Content Type</Label>
-                    <Select
-                      value={contentType}
-                      onValueChange={(value) => setContentType(value as ContentType)}
+                  <div className="flex space-x-2">
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isGenerating || !prompt.trim()}
                     >
-                      <SelectTrigger id="content-type" className="mt-1">
-                        <SelectValue placeholder="Select content type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="blog">Blog Post</SelectItem>
-                        <SelectItem value="social">Social Media Post</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
-                        <SelectItem value="ad">Advertisement</SelectItem>
-                        <SelectItem value="story">Creative Story</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-4 w-4" /> Generate
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleReset}
+                      disabled={isGenerating}
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
                   </div>
-                  
-                  <div>
-                    <Label htmlFor="tone">Tone</Label>
-                    <Select value={tone} onValueChange={setTone}>
-                      <SelectTrigger id="tone" className="mt-1">
-                        <SelectValue placeholder="Select tone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="professional">Professional</SelectItem>
-                        <SelectItem value="casual">Casual</SelectItem>
-                        <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
-                        <SelectItem value="formal">Formal</SelectItem>
-                        <SelectItem value="humorous">Humorous</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <Label htmlFor="length">Length (words)</Label>
-                      <span className="text-sm text-foreground/70">{length[0]}</span>
-                    </div>
-                    <Slider
-                      id="length"
-                      min={100}
-                      max={2000}
-                      step={100}
-                      value={length}
-                      onValueChange={setLength}
-                    />
-                  </div>
-                  
-                  <Button
-                    onClick={handleGenerate}
-                    className="w-full"
-                    disabled={!prompt || isGenerating}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="mr-2 h-4 w-4" />
-                        Generate Content
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
+                </form>
+              </CardContent>
+            </Card>
             
-            <div className="lg:col-span-2">
-              <div className="bg-background border border-border rounded-lg p-6 h-full flex flex-col">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-medium">Generated Content</h2>
-                  {generatedContent && (
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" onClick={handleCopy}>
-                        <Copy className="h-4 w-4 mr-1" /> Copy
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={handleDownload}>
-                        <Download className="h-4 w-4 mr-1" /> Download
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Generated Content</CardTitle>
+                <CardDescription>
+                  Your AI-generated content will appear here
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
                 {isGenerating ? (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-                      <p className="mt-4">Generating amazing content for you...</p>
+                  <div className="h-96 flex items-center justify-center">
+                    <div className="flex flex-col items-center">
+                      <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                      <p className="mt-4 text-foreground/70">
+                        Generating your content...
+                      </p>
                     </div>
                   </div>
                 ) : generatedContent ? (
-                  <div className="flex-1 overflow-y-auto whitespace-pre-wrap border border-border rounded p-4 bg-muted/30">
-                    {generatedContent}
+                  <div className="bg-muted rounded-md p-4 min-h-96 max-h-96 overflow-y-auto">
+                    <pre className="whitespace-pre-wrap font-sans text-sm">
+                      {generatedContent}
+                    </pre>
                   </div>
                 ) : (
-                  <div className="flex-1 flex items-center justify-center text-center text-foreground/50">
-                    <div>
-                      <Wand2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-lg font-medium">Your generated content will appear here</p>
-                      <p className="text-sm max-w-md mx-auto mt-2">
-                        Configure your settings and click "Generate Content" to create
-                        AI-powered text based on your prompt.
+                  <div className="h-96 flex items-center justify-center border border-dashed rounded-md">
+                    <div className="text-center p-4">
+                      <Sparkles className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
+                      <h3 className="text-lg font-medium">Nothing generated yet</h3>
+                      <p className="text-sm text-muted-foreground max-w-xs mt-2">
+                        Enter a prompt and click generate to create AI content
                       </p>
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+              {generatedContent && (
+                <CardFooter>
+                  <Button variant="outline" onClick={handleCopyToClipboard}>
+                    <Copy className="mr-2 h-4 w-4" /> Copy to Clipboard
+                  </Button>
+                </CardFooter>
+              )}
+            </Card>
+          </div>
+          
+          <div className="mt-12">
+            <Card>
+              <CardHeader>
+                <CardTitle>How It Works</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-6 sm:grid-cols-3">
+                <div className="flex flex-col items-center text-center p-4">
+                  <div className="bg-primary/10 p-3 rounded-full mb-4">
+                    <FileText className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-medium mb-2">1. Enter Your Prompt</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Describe what you want to create in natural language
+                  </p>
+                </div>
+                
+                <div className="flex flex-col items-center text-center p-4">
+                  <div className="bg-primary/10 p-3 rounded-full mb-4">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-medium mb-2">2. AI Generates Content</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Our AI models transform your prompt into high-quality content
+                  </p>
+                </div>
+                
+                <div className="flex flex-col items-center text-center p-4">
+                  <div className="bg-primary/10 p-3 rounded-full mb-4">
+                    <Copy className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-medium mb-2">3. Use & Edit</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Copy, edit or save the generated content for your projects
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>

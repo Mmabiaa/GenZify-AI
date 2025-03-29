@@ -1,279 +1,388 @@
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
-import { ArrowUpRight, MessageSquare, FileText, Volume2, Clock, Zap, Users } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from "recharts";
+import { ArrowUpRight, MessagesSquare, FileText, Volume2, RefreshCw, UserRound, Settings, Clock, Sparkles, Flame } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const usageData = [
-  { name: "Mon", chat: 45, content: 30, voice: 15 },
-  { name: "Tue", chat: 50, content: 25, voice: 20 },
-  { name: "Wed", chat: 35, content: 45, voice: 25 },
-  { name: "Thu", chat: 65, content: 35, voice: 30 },
-  { name: "Fri", chat: 75, content: 55, voice: 20 },
-  { name: "Sat", chat: 60, content: 40, voice: 10 },
-  { name: "Sun", chat: 40, content: 30, voice: 5 },
+const activityData = [
+  { name: "Mon", chat: 5, content: 2, voice: 1 },
+  { name: "Tue", chat: 7, content: 4, voice: 2 },
+  { name: "Wed", chat: 10, content: 6, voice: 3 },
+  { name: "Thu", chat: 8, content: 5, voice: 2 },
+  { name: "Fri", chat: 12, content: 7, voice: 4 },
+  { name: "Sat", chat: 6, content: 3, voice: 1 },
+  { name: "Sun", chat: 4, content: 2, voice: 0 },
 ];
 
-const performanceData = [
-  { name: "Speed", value: 85 },
-  { name: "Accuracy", value: 90 },
-  { name: "Quality", value: 75 },
-  { name: "Consistency", value: 80 },
+const usageData = [
+  { name: "Chat", value: 45, color: "#8B5CF6" },
+  { name: "Content", value: 30, color: "#EC4899" },
+  { name: "Voice", value: 15, color: "#3B82F6" },
+  { name: "Other", value: 10, color: "#10B981" },
+];
+
+const recentActivity = [
+  {
+    id: 1,
+    type: "chat",
+    title: "AI Assistant Chat",
+    description: "15 messages conversation about marketing strategies",
+    timestamp: "2 hours ago",
+    icon: <MessagesSquare className="h-4 w-4" />,
+  },
+  {
+    id: 2,
+    type: "content",
+    title: "Blog Post Generated",
+    description: "\"10 Ways to Improve Your Productivity with AI\"",
+    timestamp: "5 hours ago",
+    icon: <FileText className="h-4 w-4" />,
+  },
+  {
+    id: 3,
+    type: "voice",
+    title: "Voice Generation",
+    description: "Product announcement script converted to audio",
+    timestamp: "Yesterday",
+    icon: <Volume2 className="h-4 w-4" />,
+  },
+  {
+    id: 4,
+    type: "chat",
+    title: "AI Assistant Chat",
+    description: "Technical support conversation about API integration",
+    timestamp: "2 days ago",
+    icon: <MessagesSquare className="h-4 w-4" />,
+  },
 ];
 
 export default function Dashboard() {
+  const { toast } = useToast();
+
+  const handleRefresh = () => {
+    toast({
+      title: "Dashboard refreshed",
+      description: "Latest data has been loaded.",
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div>
-              <h1 className="text-2xl font-bold">AI Analytics Dashboard</h1>
-              <p className="text-foreground/70 mt-1">
-                Track and analyze your AI tool usage and performance
-              </p>
-            </div>
-            <Button variant="outline" className="flex items-center">
-              <Zap className="h-4 w-4 mr-2" /> Upgrade Plan
+      <main className="flex-1 container mx-auto px-4 py-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Monitor your AI usage and activity
+            </p>
+          </div>
+          
+          <div className="flex items-center mt-4 md:mt-0 gap-2">
+            <Button variant="outline" size="sm" onClick={handleRefresh}>
+              <RefreshCw className="h-4 w-4 mr-2" /> Refresh
+            </Button>
+            <Button variant="outline" size="sm">
+              <Settings className="h-4 w-4 mr-2" /> Settings
+            </Button>
+            <Button size="sm">
+              <Sparkles className="h-4 w-4 mr-2" /> Upgrade Plan
             </Button>
           </div>
+        </div>
+        
+        <div className="grid gap-4 md:grid-cols-3 mb-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Credits Remaining
+              </CardTitle>
+              <Flame className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">2,500 / 10,000</div>
+              <p className="text-xs text-muted-foreground">
+                Plan renews in 18 days
+              </p>
+              <Progress value={25} className="mt-3 h-2" />
+            </CardContent>
+          </Card>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>Total AI Chat Messages</CardDescription>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl">1,254</CardTitle>
-                  <MessageSquare className="h-4 w-4 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm">
-                  <ArrowUpRight className="h-4 w-4 mr-1 text-green-500" />
-                  <span className="text-green-500 font-medium">+12%</span>
-                  <span className="ml-1 text-foreground/70">from last week</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>Content Generated</CardDescription>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl">428</CardTitle>
-                  <FileText className="h-4 w-4 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm">
-                  <ArrowUpRight className="h-4 w-4 mr-1 text-green-500" />
-                  <span className="text-green-500 font-medium">+8%</span>
-                  <span className="ml-1 text-foreground/70">from last week</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>Voice Minutes Generated</CardDescription>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl">96</CardTitle>
-                  <Volume2 className="h-4 w-4 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm">
-                  <ArrowUpRight className="h-4 w-4 mr-1 text-green-500" />
-                  <span className="text-green-500 font-medium">+18%</span>
-                  <span className="ml-1 text-foreground/70">from last week</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>Average Response Time</CardDescription>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-2xl">1.8s</CardTitle>
-                  <Clock className="h-4 w-4 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-sm">
-                  <ArrowUpRight className="h-4 w-4 mr-1 text-green-500 rotate-180" />
-                  <span className="text-green-500 font-medium">-0.3s</span>
-                  <span className="ml-1 text-foreground/70">from last week</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Sessions
+              </CardTitle>
+              <UserRound className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">3</div>
+              <p className="text-xs text-muted-foreground">
+                Across 2 devices
+              </p>
+            </CardContent>
+          </Card>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Weekly AI Usage</CardTitle>
-                <CardDescription>
-                  Usage trends across different AI tools
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={usageData}
-                    margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--background))', 
-                        borderColor: 'hsl(var(--border))',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="chat"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      activeDot={{ r: 8 }}
-                      name="AI Chat"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="content"
-                      stroke="hsl(var(--secondary))"
-                      strokeWidth={2}
-                      name="Content Gen"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="voice"
-                      stroke="hsl(var(--accent))"
-                      strokeWidth={2}
-                      name="Voice Gen"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Performance</CardTitle>
-                <CardDescription>
-                  Performance metrics for your AI tools
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={performanceData}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                    <XAxis type="number" domain={[0, 100]} />
-                    <YAxis dataKey="name" type="category" />
-                    <Tooltip
-                      formatter={(value) => [`${value}%`, 'Score']}
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--background))', 
-                        borderColor: 'hsl(var(--border))',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Last Activity
+              </CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">2h 15m ago</div>
+              <p className="text-xs text-muted-foreground">
+                AI Chat session
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <Tabs defaultValue="overview" className="mb-6">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="usage">Usage</TabsTrigger>
+          </TabsList>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent AI Sessions</CardTitle>
-                <CardDescription>
-                  Your latest interactions with AI tools
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { type: "chat", title: "Marketing Strategy Discussion", time: "2 hours ago" },
-                    { type: "content", title: "Blog Post: Future of AI", time: "Yesterday" },
-                    { type: "voice", title: "Product Announcement Script", time: "2 days ago" },
-                    { type: "chat", title: "Customer Service Training", time: "3 days ago" },
-                  ].map((session, index) => (
-                    <div 
-                      key={index} 
-                      className="flex justify-between items-center p-3 rounded-md hover:bg-muted transition-colors"
-                    >
-                      <div className="flex items-center">
-                        {session.type === "chat" && (
-                          <MessageSquare className="h-4 w-4 mr-3 text-primary" />
-                        )}
-                        {session.type === "content" && (
-                          <FileText className="h-4 w-4 mr-3 text-secondary" />
-                        )}
-                        {session.type === "voice" && (
-                          <Volume2 className="h-4 w-4 mr-3 text-accent" />
-                        )}
-                        <div>
-                          <p className="font-medium">{session.title}</p>
-                          <p className="text-xs text-foreground/60">{session.time}</p>
+          <TabsContent value="overview" className="mt-4 space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card className="col-span-2">
+                <CardHeader>
+                  <CardTitle>Weekly Activity</CardTitle>
+                  <CardDescription>
+                    Your AI usage over the past week
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="px-2">
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={activityData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Line 
+                          type="monotone" 
+                          dataKey="chat" 
+                          name="AI Chat" 
+                          stroke="#8B5CF6" 
+                          strokeWidth={2} 
+                          dot={{ r: 4 }} 
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="content" 
+                          name="Content Generation" 
+                          stroke="#EC4899" 
+                          strokeWidth={2} 
+                          dot={{ r: 4 }} 
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="voice" 
+                          name="Voice Generation" 
+                          stroke="#3B82F6" 
+                          strokeWidth={2} 
+                          dot={{ r: 4 }} 
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Usage Breakdown</CardTitle>
+                  <CardDescription>
+                    Distribution of your AI usage
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[230px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={usageData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {usageData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                  <CardDescription>
+                    Your latest interactions with AI
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="max-h-[230px] overflow-auto">
+                  <div className="space-y-4">
+                    {recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-start gap-3">
+                        <div className={`mt-1 p-1.5 rounded-lg bg-${
+                          activity.type === "chat" ? "primary" : 
+                          activity.type === "content" ? "rose-500" : "blue-500"
+                        }/10`}>
+                          {activity.icon}
                         </div>
-                      </div>
-                      <Button variant="ghost" size="sm">View</Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Popular AI Templates</CardTitle>
-                <CardDescription>
-                  Most frequently used templates
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { name: "Social Media Post", uses: 32, category: "Content" },
-                    { name: "Customer Response", uses: 28, category: "Chat" },
-                    { name: "Product Description", uses: 24, category: "Content" },
-                    { name: "Podcast Intro", uses: 18, category: "Voice" },
-                  ].map((template, index) => (
-                    <div 
-                      key={index} 
-                      className="flex justify-between items-center p-3 rounded-md hover:bg-muted transition-colors"
-                    >
-                      <div>
-                        <div className="flex items-center">
-                          <p className="font-medium">{template.name}</p>
-                          <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
-                            {template.category}
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium">{activity.title}</h4>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {activity.description}
+                          </p>
+                          <span className="text-xs text-muted-foreground mt-1 block">
+                            {activity.timestamp}
                           </span>
                         </div>
-                        <p className="text-xs text-foreground/60">{template.uses} uses this month</p>
                       </div>
-                      <Button variant="ghost" size="sm">Use</Button>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="activity" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Activity Log</CardTitle>
+                <CardDescription>
+                  Detailed log of your AI interactions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-center py-10 text-muted-foreground">
+                  Activity log will be displayed here in the full version
+                </p>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
+          
+          <TabsContent value="usage" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Usage Analytics</CardTitle>
+                <CardDescription>
+                  Detailed usage statistics and analytics
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-center py-10 text-muted-foreground">
+                  Usage analytics will be displayed here in the full version
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+        
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                AI Chat Usage
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">1,245</div>
+              <p className="text-xs text-muted-foreground">
+                +20.1% from last month
+              </p>
+              <div className="mt-4 h-[60px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={activityData}>
+                    <Bar dataKey="chat" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                Content Generated
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">876</div>
+              <p className="text-xs text-muted-foreground">
+                +12.3% from last month
+              </p>
+              <div className="mt-4 h-[60px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={activityData}>
+                    <Bar dataKey="content" fill="#EC4899" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                Audio Minutes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">324</div>
+              <p className="text-xs text-muted-foreground">
+                +5.7% from last month
+              </p>
+              <div className="mt-4 h-[60px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={activityData}>
+                    <Bar dataKey="voice" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                Subscription
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <div className="text-xl font-bold">Pro Plan</div>
+                <Badge>Active</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Renews on May 15, 2023
+              </p>
+              <Button variant="link" className="mt-4 h-auto p-0 text-primary">
+                Manage Subscription <ArrowUpRight className="ml-1 h-3 w-3" />
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </main>
       
