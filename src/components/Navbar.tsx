@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import ThemeToggle from "./ThemeToggle";
 import { Menu, X, ChevronDown } from "lucide-react";
 import UserMenu from "./UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
@@ -99,14 +98,12 @@ export default function Navbar() {
           <NavLink to="/about">About</NavLink>
           
           <div className="flex items-center gap-4 pl-4 border-l border-border">
-            <ThemeToggle />
             <UserMenu />
           </div>
         </div>
         
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-2">
-          <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={toggleMobileMenu} aria-label="Menu">
             {mobileMenuOpen ? (
               <X className="h-6 w-6" />
