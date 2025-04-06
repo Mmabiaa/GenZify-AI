@@ -7,6 +7,7 @@ export interface BlogPost {
   author: string;
   category: string;
   readTime: string;
+  image: string;
 }
 
 export const blogPosts: BlogPost[] = [
@@ -17,7 +18,8 @@ export const blogPosts: BlogPost[] = [
     date: "April 2, 2025",
     author: "Alex Johnson",
     category: "AI Trends",
-    readTime: "5 min read"
+    readTime: "5 min read",
+    image: "https://source.unsplash.com/photo-1488590528505-98d2b5aba04b"
   },
   {
     id: 2,
@@ -26,7 +28,8 @@ export const blogPosts: BlogPost[] = [
     date: "March 28, 2025",
     author: "Mia Rodriguez",
     category: "Content Creation",
-    readTime: "7 min read"
+    readTime: "7 min read",
+    image: "https://source.unsplash.com/photo-1581091226825-a6a2a5aee158"
   },
   {
     id: 3,
@@ -35,7 +38,8 @@ export const blogPosts: BlogPost[] = [
     date: "March 22, 2025",
     author: "Tyler Chang",
     category: "Voice Technology",
-    readTime: "6 min read"
+    readTime: "6 min read",
+    image: "https://source.unsplash.com/photo-1486312338219-ce68d2c6f44d"
   },
   {
     id: 4,
@@ -44,7 +48,8 @@ export const blogPosts: BlogPost[] = [
     date: "March 15, 2025",
     author: "Jordan Smith",
     category: "AI Ethics",
-    readTime: "8 min read"
+    readTime: "8 min read",
+    image: "https://source.unsplash.com/photo-1605810230434-7631ac76ec81"
   },
   {
     id: 5,
@@ -53,7 +58,8 @@ export const blogPosts: BlogPost[] = [
     date: "March 10, 2025",
     author: "Sam Taylor",
     category: "Company News",
-    readTime: "10 min read"
+    readTime: "10 min read",
+    image: "https://source.unsplash.com/photo-1498050108023-c5249f4df085"
   },
   {
     id: 6,
@@ -62,6 +68,7 @@ export const blogPosts: BlogPost[] = [
     date: "March 5, 2025",
     author: "Jamie Wong",
     category: "Education",
-    readTime: "6 min read"
+    readTime: "6 min read",
+    image: "https://source.unsplash.com/photo-1526374965328-7f61d4dc18c5"
   }
 ];

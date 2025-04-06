@@ -48,15 +48,17 @@ export default function BlogPost() {
             </div>
           </div>
           
-          <Card className="mb-8">
+          <Card className="mb-8 overflow-hidden">
             <CardContent className="p-0">
-              <div className="w-full h-64 bg-accent/20 flex items-center justify-center">
-                <span className="text-xl text-accent/70">Featured Image</span>
-              </div>
+              <img 
+                src={post.image} 
+                alt={post.title} 
+                className="w-full h-auto aspect-video object-cover"
+              />
             </CardContent>
           </Card>
           
-          <div className="prose prose-lg max-w-none">
+          <div className="prose prose-lg max-w-none dark:prose-invert">
             <p className="lead">{post.excerpt}</p>
             
             <p>
@@ -120,9 +122,18 @@ export default function BlogPost() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {blogPosts.filter(p => p.id !== postId).slice(0, 2).map(relatedPost => (
                 <Card key={relatedPost.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <Link to={`/blog/${relatedPost.id}`} className="block p-6">
-                    <h4 className="text-lg font-bold mb-2 line-clamp-2">{relatedPost.title}</h4>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{relatedPost.excerpt}</p>
+                  <Link to={`/blog/${relatedPost.id}`} className="block">
+                    <div className="w-full h-40 overflow-hidden">
+                      <img 
+                        src={relatedPost.image} 
+                        alt={relatedPost.title} 
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h4 className="text-lg font-bold mb-2 line-clamp-2">{relatedPost.title}</h4>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{relatedPost.excerpt}</p>
+                    </div>
                   </Link>
                 </Card>
               ))}

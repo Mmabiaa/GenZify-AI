@@ -25,9 +25,9 @@ export default function Careers() {
                 creators, and problem-solvers who are passionate about making technology more accessible and engaging.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Link to="#openings">
+                <a href="#openings">
                   <Button size="lg">View Open Positions</Button>
-                </Link>
+                </a>
                 <Link to="/contact">
                   <Button variant="outline" size="lg">Contact Recruiting</Button>
                 </Link>
@@ -107,7 +107,7 @@ export default function Careers() {
         </section>
         
         {/* Open Positions Section */}
-        <section id="openings" className="py-16 md:py-24 bg-muted/50">
+        <section id="openings" className="py-16 md:py-24 bg-muted/50 scroll-mt-16">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Open Positions</h2>

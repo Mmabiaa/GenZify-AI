@@ -31,6 +31,15 @@ export default function Blog() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {blogPosts.slice(0, visiblePosts).map((post) => (
               <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <Link to={`/blog/${post.id}`} className="block">
+                  <div className="w-full h-48 overflow-hidden">
+                    <img 
+                      src={post.image} 
+                      alt={post.title} 
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    />
+                  </div>
+                </Link>
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-medium px-2.5 py-0.5 rounded bg-primary/10 text-primary">
@@ -38,7 +47,9 @@ export default function Blog() {
                     </span>
                     <span className="text-xs text-muted-foreground">{post.readTime}</span>
                   </div>
-                  <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
+                  <CardTitle className="text-xl line-clamp-2">
+                    <Link to={`/blog/${post.id}`}>{post.title}</Link>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-4">
                   <CardDescription className="line-clamp-3">
