@@ -16,8 +16,11 @@ import SignUp from "./pages/SignUp";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Contact from "./pages/Contact";
+import ThankYou from "./pages/ThankYou";
 import Careers from "./pages/Careers";
+import JobApplication from "./pages/JobApplication";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
@@ -42,8 +45,11 @@ const App = () => (
             <Route path="/signup" element={<SignUp />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/careers" element={<Careers />} />
+            <Route path="/careers/:id" element={<JobApplication />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/cookies" element={<CookiePolicy />} />

@@ -4,93 +4,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-interface JobListing {
-  id: number;
-  title: string;
-  department: string;
-  location: string;
-  type: "Full-time" | "Part-time" | "Contract" | "Remote";
-  description: string;
-  postedDate: string;
-}
-
-const jobListings: JobListing[] = [
-  {
-    id: 1,
-    title: "AI Research Scientist",
-    department: "Research & Development",
-    location: "San Francisco, CA (Remote Option)",
-    type: "Full-time",
-    description: "Join our R&D team to push the boundaries of AI and develop next-generation language models tailored for Gen Z users.",
-    postedDate: "April 3, 2025"
-  },
-  {
-    id: 2,
-    title: "Frontend Developer",
-    department: "Engineering",
-    location: "Remote",
-    type: "Full-time",
-    description: "Create engaging, responsive user interfaces for our AI platform using React, TypeScript, and modern web technologies.",
-    postedDate: "April 2, 2025"
-  },
-  {
-    id: 3,
-    title: "UX/UI Designer",
-    department: "Design",
-    location: "San Francisco, CA",
-    type: "Full-time",
-    description: "Design intuitive, engaging experiences for our AI tools that resonate with Gen Z users and creators.",
-    postedDate: "March 30, 2025"
-  },
-  {
-    id: 4,
-    title: "AI Product Manager",
-    department: "Product",
-    location: "San Francisco, CA (Remote Option)",
-    type: "Full-time",
-    description: "Lead the development of AI products from conception to launch, working with cross-functional teams to deliver exceptional user experiences.",
-    postedDate: "March 28, 2025"
-  },
-  {
-    id: 5,
-    title: "Content Marketing Specialist",
-    department: "Marketing",
-    location: "Remote",
-    type: "Full-time",
-    description: "Create compelling content that showcases our AI capabilities and engages our Gen Z audience across various platforms.",
-    postedDate: "March 25, 2025"
-  },
-  {
-    id: 6,
-    title: "Backend Engineer",
-    department: "Engineering",
-    location: "San Francisco, CA (Remote Option)",
-    type: "Full-time",
-    description: "Build scalable, secure backend systems for our AI platform using modern technologies and cloud infrastructure.",
-    postedDate: "March 23, 2025"
-  },
-  {
-    id: 7,
-    title: "AI Implementation Consultant",
-    department: "Customer Success",
-    location: "Remote",
-    type: "Contract",
-    description: "Help our clients successfully implement and maximize value from our AI solutions through technical guidance and best practices.",
-    postedDate: "March 20, 2025"
-  },
-  {
-    id: 8,
-    title: "Data Engineer",
-    department: "Engineering",
-    location: "San Francisco, CA",
-    type: "Full-time",
-    description: "Design and implement data pipelines that feed our AI models, ensuring high quality and efficient data processing.",
-    postedDate: "March 18, 2025"
-  }
-];
+import { Link } from "react-router-dom";
+import { careers } from "@/data/careers";
+import { Briefcase, MapPin, Building, Users } from "lucide-react";
 
 export default function Careers() {
   return (
@@ -98,54 +14,91 @@ export default function Careers() {
       <Navbar />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="py-16 px-4 bg-gradient-to-b from-background to-background/80">
-          <div className="container mx-auto text-center max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent mb-6">
-              Join the GenZify Team
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8">
-              Help us build the future of AI for the next generation. We're looking for passionate individuals who are excited about creating innovative AI solutions.
-            </p>
-            <Button size="lg" className="bg-primary hover:bg-primary/90">
-              View Open Positions
-            </Button>
+        <section className="bg-gradient-to-b from-background to-background/80 border-b">
+          <div className="container mx-auto px-4 py-16 md:py-24">
+            <div className="max-w-3xl mx-auto text-center">
+              <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent mb-4">
+                Join the GenZify Team
+              </h1>
+              <p className="text-lg text-muted-foreground mb-8">
+                Help us build the future of AI for Generation Z. We're looking for innovative thinkers, 
+                creators, and problem-solvers who are passionate about making technology more accessible and engaging.
+              </p>
+              <div className="flex flex-wrap justify-center gap-4">
+                <Link to="#openings">
+                  <Button size="lg">View Open Positions</Button>
+                </Link>
+                <Link to="/contact">
+                  <Button variant="outline" size="lg">Contact Recruiting</Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
         
         {/* Values Section */}
-        <section className="py-16 px-4 bg-muted/30">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-center mb-12">Our Values</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="bg-card/60 backdrop-blur-sm border-primary/20">
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Our Values</h2>
+              <p className="text-muted-foreground">
+                These core principles guide everything we do at GenZify
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="text-center">
                 <CardHeader>
-                  <CardTitle className="text-xl">Innovation First</CardTitle>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Inclusive Innovation</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    We push boundaries and think outside the box. We're not afraid to challenge conventional wisdom and try new approaches.
+                    We build AI that works for everyone, considering diverse perspectives and needs.
                   </p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-card/60 backdrop-blur-sm border-secondary/20">
+              <Card className="text-center">
                 <CardHeader>
-                  <CardTitle className="text-xl">Inclusive Technology</CardTitle>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Human-Centered</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    We believe AI should be accessible to everyone. We strive to create technology that is inclusive, fair, and beneficial for all users.
+                    Technology should enhance human potential, not replace it. People come first.
                   </p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-card/60 backdrop-blur-sm border-accent/20">
+              <Card className="text-center">
                 <CardHeader>
-                  <CardTitle className="text-xl">User-Centric Design</CardTitle>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Bold Creativity</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Our users are at the heart of everything we do. We obsess over creating exceptional experiences that delight and empower.
+                    We take risks, challenge the status quo, and aren't afraid to reimagine the future.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="text-center">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Ethical Impact</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    We consider the broader implications of our work and strive to make a positive difference.
                   </p>
                 </CardContent>
               </Card>
@@ -154,168 +107,96 @@ export default function Careers() {
         </section>
         
         {/* Open Positions Section */}
-        <section className="py-16 px-4" id="open-positions">
-          <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-12">
+        <section id="openings" className="py-16 md:py-24 bg-muted/50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Open Positions</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Join our team of innovators and help shape the future of AI technology for Generation Z.
+              <p className="text-muted-foreground">
+                Join our team and help shape the future of AI for Generation Z
               </p>
             </div>
             
-            <Tabs defaultValue="all" className="mb-8">
-              <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-4 md:grid-cols-5 h-auto">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="engineering">Engineering</TabsTrigger>
-                <TabsTrigger value="design">Design</TabsTrigger>
-                <TabsTrigger value="product">Product</TabsTrigger>
-                <TabsTrigger value="marketing">Marketing</TabsTrigger>
-              </TabsList>
+            <div className="max-w-4xl mx-auto space-y-6">
+              {careers.map((job) => (
+                <Card key={job.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <CardTitle>{job.title}</CardTitle>
+                    <CardDescription className="flex flex-col sm:flex-row gap-2 sm:gap-6 mt-2">
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4 text-primary" />
+                        <span>{job.type}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <span>{job.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Building className="h-4 w-4 text-primary" />
+                        <span>{job.department}</span>
+                      </div>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">{job.description}</p>
+                  </CardContent>
+                  <CardFooter className="border-t bg-background/50 p-4">
+                    <Button asChild>
+                      <Link to={`/careers/${job.id}`}>Apply Now</Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+        
+        {/* Benefits Section */}
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Benefits & Perks</h2>
+              <p className="text-muted-foreground">
+                We take care of our team so they can focus on creating amazing products
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Health & Wellness</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm">• Comprehensive health insurance</p>
+                  <p className="text-sm">• Mental health support</p>
+                  <p className="text-sm">• Fitness stipend</p>
+                  <p className="text-sm">• Generous PTO policy</p>
+                </CardContent>
+              </Card>
               
-              <TabsContent value="all" className="mt-6">
-                <div className="grid gap-4">
-                  {jobListings.map((job) => (
-                    <Card key={job.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                      <CardHeader className="pb-2">
-                        <div className="flex flex-wrap justify-between items-start gap-2">
-                          <div>
-                            <CardTitle>{job.title}</CardTitle>
-                            <CardDescription className="mt-1">{job.department} • {job.location}</CardDescription>
-                          </div>
-                          <Badge variant={job.type === "Remote" ? "outline" : "default"} className="mt-1">
-                            {job.type}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pb-4">
-                        <p className="text-muted-foreground">{job.description}</p>
-                      </CardContent>
-                      <CardFooter className="flex justify-between border-t pt-4">
-                        <span className="text-sm text-muted-foreground">Posted: {job.postedDate}</span>
-                        <Button size="sm" variant="secondary">View Details</Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Professional Growth</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm">• Learning & development budget</p>
+                  <p className="text-sm">• Conference attendance</p>
+                  <p className="text-sm">• Mentorship programs</p>
+                  <p className="text-sm">• Career advancement paths</p>
+                </CardContent>
+              </Card>
               
-              <TabsContent value="engineering" className="mt-6">
-                <div className="grid gap-4">
-                  {jobListings
-                    .filter(job => job.department === "Engineering")
-                    .map((job) => (
-                      <Card key={job.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                        <CardHeader className="pb-2">
-                          <div className="flex flex-wrap justify-between items-start gap-2">
-                            <div>
-                              <CardTitle>{job.title}</CardTitle>
-                              <CardDescription className="mt-1">{job.department} • {job.location}</CardDescription>
-                            </div>
-                            <Badge variant={job.type === "Remote" ? "outline" : "default"} className="mt-1">
-                              {job.type}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pb-4">
-                          <p className="text-muted-foreground">{job.description}</p>
-                        </CardContent>
-                        <CardFooter className="flex justify-between border-t pt-4">
-                          <span className="text-sm text-muted-foreground">Posted: {job.postedDate}</span>
-                          <Button size="sm" variant="secondary">View Details</Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                </div>
-              </TabsContent>
-              
-              {/* Similar TabsContent for other departments */}
-              <TabsContent value="design" className="mt-6">
-                <div className="grid gap-4">
-                  {jobListings
-                    .filter(job => job.department === "Design")
-                    .map((job) => (
-                      <Card key={job.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                        <CardHeader className="pb-2">
-                          <div className="flex flex-wrap justify-between items-start gap-2">
-                            <div>
-                              <CardTitle>{job.title}</CardTitle>
-                              <CardDescription className="mt-1">{job.department} • {job.location}</CardDescription>
-                            </div>
-                            <Badge variant={job.type === "Remote" ? "outline" : "default"} className="mt-1">
-                              {job.type}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pb-4">
-                          <p className="text-muted-foreground">{job.description}</p>
-                        </CardContent>
-                        <CardFooter className="flex justify-between border-t pt-4">
-                          <span className="text-sm text-muted-foreground">Posted: {job.postedDate}</span>
-                          <Button size="sm" variant="secondary">View Details</Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="product" className="mt-6">
-                <div className="grid gap-4">
-                  {jobListings
-                    .filter(job => job.department === "Product")
-                    .map((job) => (
-                      <Card key={job.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                        <CardHeader className="pb-2">
-                          <div className="flex flex-wrap justify-between items-start gap-2">
-                            <div>
-                              <CardTitle>{job.title}</CardTitle>
-                              <CardDescription className="mt-1">{job.department} • {job.location}</CardDescription>
-                            </div>
-                            <Badge variant={job.type === "Remote" ? "outline" : "default"} className="mt-1">
-                              {job.type}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pb-4">
-                          <p className="text-muted-foreground">{job.description}</p>
-                        </CardContent>
-                        <CardFooter className="flex justify-between border-t pt-4">
-                          <span className="text-sm text-muted-foreground">Posted: {job.postedDate}</span>
-                          <Button size="sm" variant="secondary">View Details</Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="marketing" className="mt-6">
-                <div className="grid gap-4">
-                  {jobListings
-                    .filter(job => job.department === "Marketing")
-                    .map((job) => (
-                      <Card key={job.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                        <CardHeader className="pb-2">
-                          <div className="flex flex-wrap justify-between items-start gap-2">
-                            <div>
-                              <CardTitle>{job.title}</CardTitle>
-                              <CardDescription className="mt-1">{job.department} • {job.location}</CardDescription>
-                            </div>
-                            <Badge variant={job.type === "Remote" ? "outline" : "default"} className="mt-1">
-                              {job.type}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pb-4">
-                          <p className="text-muted-foreground">{job.description}</p>
-                        </CardContent>
-                        <CardFooter className="flex justify-between border-t pt-4">
-                          <span className="text-sm text-muted-foreground">Posted: {job.postedDate}</span>
-                          <Button size="sm" variant="secondary">View Details</Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                </div>
-              </TabsContent>
-            </Tabs>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Life at GenZify</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm">• Flexible work arrangements</p>
+                  <p className="text-sm">• Home office stipend</p>
+                  <p className="text-sm">• Team retreats</p>
+                  <p className="text-sm">• Equity in a growing company</p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </section>
       </main>

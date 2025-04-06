@@ -5,75 +5,15 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-
-interface BlogPost {
-  id: number;
-  title: string;
-  excerpt: string;
-  date: string;
-  author: string;
-  category: string;
-  readTime: string;
-}
-
-const blogPosts: BlogPost[] = [
-  {
-    id: 1,
-    title: "The Future of Gen Z and AI: What's Next?",
-    excerpt: "Exploring how Generation Z is shaping and being shaped by artificial intelligence technologies.",
-    date: "April 2, 2025",
-    author: "Alex Johnson",
-    category: "AI Trends",
-    readTime: "5 min read"
-  },
-  {
-    id: 2,
-    title: "Creating Viral Content with GenZify AI",
-    excerpt: "Learn how content creators are leveraging our AI tools to create engaging, shareable content.",
-    date: "March 28, 2025",
-    author: "Mia Rodriguez",
-    category: "Content Creation",
-    readTime: "7 min read"
-  },
-  {
-    id: 3,
-    title: "Voice AI: The Technology Revolutionizing Communication",
-    excerpt: "How voice synthesis technology is changing the way we interact with digital platforms.",
-    date: "March 22, 2025",
-    author: "Tyler Chang",
-    category: "Voice Technology",
-    readTime: "6 min read"
-  },
-  {
-    id: 4,
-    title: "AI Ethics: Responsible Innovation for Gen Z",
-    excerpt: "Discussing the importance of ethical considerations in AI development for younger generations.",
-    date: "March 15, 2025",
-    author: "Jordan Smith",
-    category: "AI Ethics",
-    readTime: "8 min read"
-  },
-  {
-    id: 5,
-    title: "The GenZify Journey: From Startup to AI Platform",
-    excerpt: "Our founder shares the story of how GenZify evolved from a simple idea to a comprehensive AI platform.",
-    date: "March 10, 2025",
-    author: "Sam Taylor",
-    category: "Company News",
-    readTime: "10 min read"
-  },
-  {
-    id: 6,
-    title: "AI and Education: Tools for Next-Gen Learning",
-    excerpt: "How artificial intelligence is transforming educational experiences for Generation Z students.",
-    date: "March 5, 2025",
-    author: "Jamie Wong",
-    category: "Education",
-    readTime: "6 min read"
-  }
-];
+import { blogPosts } from "@/data/blogPosts";
 
 export default function Blog() {
+  const [visiblePosts, setVisiblePosts] = React.useState(6);
+  
+  const loadMorePosts = () => {
+    setVisiblePosts(prevCount => Math.min(prevCount + 3, blogPosts.length));
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -89,7 +29,7 @@ export default function Blog() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {blogPosts.map((post) => (
+            {blogPosts.slice(0, visiblePosts).map((post) => (
               <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-center mb-2">
@@ -110,8 +50,8 @@ export default function Blog() {
                     <span className="text-foreground font-medium">{post.author}</span>
                     <span className="text-muted-foreground"> • {post.date}</span>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    Read more
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to={`/blog/${post.id}`}>Read more</Link>
                   </Button>
                 </CardFooter>
               </Card>
@@ -119,9 +59,13 @@ export default function Blog() {
           </div>
           
           <div className="mt-12 text-center">
-            <Button className="bg-primary hover:bg-primary/90">
-              Load More Articles
-            </Button>
+            {visiblePosts < blogPosts.length ? (
+              <Button className="bg-primary hover:bg-primary/90" onClick={loadMorePosts}>
+                Load More Articles
+              </Button>
+            ) : (
+              <p className="text-muted-foreground">You've reached the end of our articles.</p>
+            )}
           </div>
         </div>
       </main>

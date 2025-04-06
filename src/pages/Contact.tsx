@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export default function Contact() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +20,11 @@ export default function Contact() {
       title: "Message sent!",
       description: "We've received your message and will get back to you shortly.",
     });
+    
+    // Simulate form submission delay then navigate
+    setTimeout(() => {
+      navigate("/thank-you");
+    }, 1000);
   };
   
   return (
