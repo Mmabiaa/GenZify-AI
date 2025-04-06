@@ -48,12 +48,12 @@ export default function BlogPost() {
             </div>
           </div>
           
-          <Card className="mb-8 overflow-hidden">
+          <Card className="mb-8 overflow-hidden rounded-xl shadow-md">
             <CardContent className="p-0">
               <img 
                 src={post.image} 
                 alt={post.title} 
-                className="w-full h-auto aspect-video object-cover"
+                className="w-full h-[400px] object-cover"
               />
             </CardContent>
           </Card>

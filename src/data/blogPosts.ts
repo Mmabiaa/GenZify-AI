@@ -19,7 +19,7 @@ export const blogPosts: BlogPost[] = [
     author: "Alex Johnson",
     category: "AI Trends",
     readTime: "5 min read",
-    image: "https://source.unsplash.com/photo-1488590528505-98d2b5aba04b"
+    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80"
   },
   {
     id: 2,
@@ -29,7 +29,7 @@ export const blogPosts: BlogPost[] = [
     author: "Mia Rodriguez",
     category: "Content Creation",
     readTime: "7 min read",
-    image: "https://source.unsplash.com/photo-1581091226825-a6a2a5aee158"
+    image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&q=80"
   },
   {
     id: 3,
@@ -39,7 +39,7 @@ export const blogPosts: BlogPost[] = [
     author: "Tyler Chang",
     category: "Voice Technology",
     readTime: "6 min read",
-    image: "https://source.unsplash.com/photo-1486312338219-ce68d2c6f44d"
+    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80"
   },
   {
     id: 4,
@@ -49,7 +49,7 @@ export const blogPosts: BlogPost[] = [
     author: "Jordan Smith",
     category: "AI Ethics",
     readTime: "8 min read",
-    image: "https://source.unsplash.com/photo-1605810230434-7631ac76ec81"
+    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80"
   },
   {
     id: 5,
@@ -59,7 +59,7 @@ export const blogPosts: BlogPost[] = [
     author: "Sam Taylor",
     category: "Company News",
     readTime: "10 min read",
-    image: "https://source.unsplash.com/photo-1498050108023-c5249f4df085"
+    image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&q=80"
   },
   {
     id: 6,
@@ -69,6 +69,6 @@ export const blogPosts: BlogPost[] = [
     author: "Jamie Wong",
     category: "Education",
     readTime: "6 min read",
-    image: "https://source.unsplash.com/photo-1526374965328-7f61d4dc18c5"
+    image: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&q=80"
   }
 ];
