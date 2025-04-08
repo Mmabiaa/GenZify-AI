@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { 
@@ -13,9 +13,61 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Volume2, Play, Download, Pause, Loader2, RotateCcw } from "lucide-react";
+import { Volume2, Play, Download, Pause, Loader2, RotateCcw, Mic } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+// Simple demo voice generator
+const generateVoice = (text: string, voice: string): string => {
+  // In a real app, this would call a TTS API
+  // For the demo, we'll use some sample audio files based on the voice selection
+  const sampleAudios = {
+    'emma': "https://audio-samples.github.io/samples/mp3/blizzard_biased/sample-4.mp3",
+    'jackson': "https://audio-samples.github.io/samples/mp3/blizzard_primed/sample-0.mp3",
+    'olivia': "https://audio-samples.github.io/samples/mp3/blizzard_primed/sample-2.mp3",
+    'noah': "https://audio-samples.github.io/samples/mp3/blizzard_narrative/sample-1.mp3",
+    'yuki': "https://audio-samples.github.io/samples/mp3/blizzard_biased/sample-1.mp3"
+  };
+  
+  return sampleAudios[voice as keyof typeof sampleAudios] || sampleAudios.emma;
+};
+
+// Voice recording functionality for the demo
+class AudioRecorder {
+  private mediaRecorder: MediaRecorder | null = null;
+  private audioChunks: Blob[] = [];
+  
+  async start(): Promise<void> {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    this.mediaRecorder = new MediaRecorder(stream);
+    this.audioChunks = [];
+    
+    this.mediaRecorder.addEventListener('dataavailable', (event) => {
+      this.audioChunks.push(event.data);
+    });
+    
+    this.mediaRecorder.start();
+  }
+  
+  stop(): Promise<string> {
+    return new Promise((resolve) => {
+      if (!this.mediaRecorder) {
+        resolve('');
+        return;
+      }
+      
+      this.mediaRecorder.addEventListener('stop', () => {
+        const audioBlob = new Blob(this.audioChunks);
+        const audioUrl = URL.createObjectURL(audioBlob);
+        resolve(audioUrl);
+      });
+      
+      this.mediaRecorder.stop();
+      // Stop all microphone streams
+      this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    });
+  }
+}
 
 export default function Voice() {
   const [text, setText] = useState("");
@@ -25,8 +77,18 @@ export default function Voice() {
   const [voice, setVoice] = useState("emma");
   const [stability, setStability] = useState([75]);
   const [clarity, setClarity] = useState([85]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const recordedAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRecorder = useRef<AudioRecorder>(new AudioRecorder());
   const { toast } = useToast();
+  
+  useEffect(() => {
+    if (recordedAudio && recordedAudioRef.current) {
+      recordedAudioRef.current.load();
+    }
+  }, [recordedAudio]);
   
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,18 +104,18 @@ export default function Voice() {
     
     setIsGenerating(true);
     
-    // Simulate generation delay
+    // Simulate API call delay
     setTimeout(() => {
-      // In a production app, this would call an actual TTS API
-      // For demo purposes, we're using a sample MP3
-      setGeneratedAudio("https://audio-samples.github.io/samples/mp3/blizzard_biased/sample-4.mp3");
+      // Generate voice using our demo function
+      const audioUrl = generateVoice(text, voice);
+      setGeneratedAudio(audioUrl);
       setIsGenerating(false);
       
       toast({
         title: "Voice generated",
         description: "Your text has been converted to speech.",
       });
-    }, 2000);
+    }, 1500);
   };
   
   const handlePlay = () => {
@@ -99,6 +161,48 @@ export default function Voice() {
     });
   };
   
+  const startRecording = async () => {
+    try {
+      await audioRecorder.current.start();
+      setIsRecording(true);
+      
+      toast({
+        title: "Recording started",
+        description: "Speak now. Click stop when finished.",
+      });
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      toast({
+        title: "Recording error",
+        description: "Could not access your microphone. Please check permissions.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const stopRecording = async () => {
+    try {
+      const audioUrl = await audioRecorder.current.stop();
+      setRecordedAudio(audioUrl);
+      setIsRecording(false);
+      
+      toast({
+        title: "Recording stopped",
+        description: "Your recording is ready to play.",
+      });
+      
+      // Simulate transcription by generating placeholder text
+      setTimeout(() => {
+        const placeholderText = "This is a transcription of your speech. In a real application, this would use a speech-to-text API to convert your audio to text.";
+        setText(placeholderText);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error stopping recording:", error);
+      setIsRecording(false);
+    }
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -117,6 +221,28 @@ export default function Voice() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div className="mb-6 p-4 border border-border rounded-md">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-sm font-medium">Record Audio Input</h3>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant={isRecording ? "destructive" : "outline"} 
+                      size="sm"
+                      onClick={isRecording ? stopRecording : startRecording}
+                    >
+                      {isRecording ? "Stop Recording" : "Start Recording"}
+                      <Mic className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                {recordedAudio && (
+                  <div className="mt-4">
+                    <audio ref={recordedAudioRef} src={recordedAudio} controls className="w-full" />
+                  </div>
+                )}
+              </div>
+              
               <form onSubmit={handleGenerate} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-3">
