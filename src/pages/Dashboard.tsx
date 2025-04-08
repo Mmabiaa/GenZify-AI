@@ -92,12 +92,14 @@ export default function Dashboard() {
   const [analyticsData, setAnalyticsData] = useState(generateAnalyticsData(7));
   const [usageReport, setUsageReport] = useState<null | string>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [timeFrame, setTimeFrame] = useState<"7d" | "30d" | "90d">("7d");
 
   const handleRefresh = () => {
     setIsRefreshing(true);
     setTimeout(() => {
       // Generate new random data
-      setAnalyticsData(generateAnalyticsData(7));
+      const days = timeFrame === "7d" ? 7 : timeFrame === "30d" ? 30 : 90;
+      setAnalyticsData(generateAnalyticsData(days));
       setIsRefreshing(false);
       
       toast({
@@ -109,6 +111,10 @@ export default function Dashboard() {
   
   const handleUpgrade = () => {
     navigate("/pricing");
+    toast({
+      title: "Navigating to Pricing",
+      description: "Check out our premium plans for more features.",
+    });
   };
   
   const handleSettings = () => {
@@ -149,6 +155,26 @@ export default function Dashboard() {
   
   const handleNavigateToFeature = (path: string) => {
     navigate(path);
+    toast({
+      title: `Navigating to ${path.substring(1)}`,
+      description: `You're being redirected to the ${path.substring(1)} page.`,
+    });
+  };
+
+  const handleTimeFrameChange = (frame: "7d" | "30d" | "90d") => {
+    setTimeFrame(frame);
+    setAnalyticsData(generateAnalyticsData(frame === "7d" ? 7 : frame === "30d" ? 30 : 90));
+    toast({
+      title: `Timeframe changed to ${frame}`,
+      description: "Dashboard data has been updated.",
+    });
+  };
+
+  const handleAlertSettings = () => {
+    toast({
+      title: "Alert settings opened",
+      description: "Set up email notifications for important events.",
+    });
   };
 
   return (
@@ -201,13 +227,35 @@ export default function Dashboard() {
                   </Button>
                 </div>
                 <div>
-                  <Button variant="outline" className="w-full" onClick={() => {
-                    toast({
-                      title: "Alert settings",
-                      description: "Set up email notifications for important events",
-                    });
-                  }}>
+                  <Button variant="outline" className="w-full" onClick={handleAlertSettings}>
                     <AlertCircle className="h-4 w-4 mr-2" /> Alert Settings
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">Time Range</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={timeFrame === "7d" ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => handleTimeFrameChange("7d")}
+                  >
+                    7 Days
+                  </Button>
+                  <Button 
+                    variant={timeFrame === "30d" ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => handleTimeFrameChange("30d")}
+                  >
+                    30 Days
+                  </Button>
+                  <Button 
+                    variant={timeFrame === "90d" ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => handleTimeFrameChange("90d")}
+                  >
+                    90 Days
                   </Button>
                 </div>
               </div>
@@ -287,7 +335,7 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle>Weekly Activity</CardTitle>
                   <CardDescription>
-                    Your AI usage over the past week
+                    Your AI usage over the past {timeFrame === "7d" ? "week" : timeFrame === "30d" ? "month" : "3 months"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-2">
@@ -602,7 +650,7 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground">
                 Renews on May 15, 2025
               </p>
-              <Button variant="link" className="mt-4 h-auto p-0 text-primary">
+              <Button variant="link" className="mt-4 h-auto p-0 text-primary" onClick={() => handleNavigateToFeature('/pricing')}>
                 Manage Subscription <ArrowUpRight className="ml-1 h-3 w-3" />
               </Button>
             </CardContent>
