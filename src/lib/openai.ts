@@ -5,10 +5,7 @@ import { toast } from "@/hooks/use-toast"
 export const generateAIResponse = async (
   prompt: string,
   apiKey: string | null
-): Promise<{
-  text: string
-  contentType: "text" | "voice" | "video" | "document"
-}> => {
+): Promise<{ text: string; contentType: "text" | "voice" | "video" | "document" }> => {
   // Fallback to mock if no key
   if (!apiKey) {
     return mockAIResponse(prompt)
