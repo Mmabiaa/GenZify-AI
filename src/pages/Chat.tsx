@@ -1,32 +1,22 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Bot,
-  User,
-  X,
-  Key,
-  Sparkles,
-  Loader2,
-  FileText,
-  Volume2,
-  Video,
-  Send,
-  ArrowDown,
-} from "lucide-react";
+
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import {
+import { useToast } from "@/hooks/use-toast";
+import { Sparkles, Send, Bot, User, ArrowDown, X, Loader2, Video, FileText, Volume2, Key } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { 
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { generateAIResponse } from "@/lib/ai";
+import { generateAIResponse } from "@/utils/openai";
 import { Message } from "@/types";
 
 export default function Chat() {
