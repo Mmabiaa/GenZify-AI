@@ -3,9 +3,20 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Send, Bot, User, ArrowDown, X, Loader2, Video, FileText, Volume2 } from "lucide-react";
+import { Sparkles, Send, Bot, User, ArrowDown, X, Loader2, Video, FileText, Volume2, Key } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { generateAIResponse } from "@/utils/openai";
 
 type Message = {
   id: string;
@@ -15,88 +26,16 @@ type Message = {
   contentType?: "text" | "voice" | "video" | "document";
 };
 
-// Enhanced AI processor with more capabilities
-const processAIResponse = (input: string) => {
-  const lowercaseInput = input.toLowerCase();
-  
-  // Content generation for different media types
-  if (lowercaseInput.includes("write") || lowercaseInput.includes("generate") || lowercaseInput.includes("create")) {
-    if (lowercaseInput.includes("video") || lowercaseInput.includes("movie")) {
-      return {
-        text: "I've generated a sample video script for you:\n\n[SCENE 1: Exterior - City Street - Day]\nThe camera pans across a busy street, showing people using various AI-powered devices in their daily lives.\n\nVOICEOVER: In a world where technology shapes our every interaction...\n\n[SCENE 2: Close-up - Smart Device]\nA person asks their smart device a complex question and receives an immediate, thoughtful response.\n\nVOICEOVER: AI is more than just an assistant. It's becoming a companion on our journey.\n\nThis script is designed to be engaging and visually compelling. In a full implementation, I could generate complete video content based on your specific requirements.",
-        contentType: "video"
-      };
-    } else if (lowercaseInput.includes("document") || lowercaseInput.includes("report") || lowercaseInput.includes("paper")) {
-      return {
-        text: "# Artificial Intelligence: Present and Future\n\n## Executive Summary\nThis document explores the current state of artificial intelligence and potential future developments. AI has become deeply integrated into daily life through voice assistants, recommendation systems, and automated processes.\n\n## Current Applications\n- **Natural Language Processing**: Enabling machines to understand and generate human language\n- **Computer Vision**: Allowing systems to interpret and analyze visual information\n- **Recommendation Systems**: Personalizing content and product suggestions\n\n## Future Directions\n1. **Multimodal AI**: Systems that combine text, vision, audio, and other inputs\n2. **Human-AI Collaboration**: Tools designed specifically to enhance human capabilities\n3. **Responsible AI Development**: Ethical frameworks and governance\n\n## Conclusion\nThe continued evolution of AI presents both significant opportunities and challenges that require thoughtful navigation.",
-        contentType: "document"
-      };
-    } else if (lowercaseInput.includes("voice") || lowercaseInput.includes("audio") || lowercaseInput.includes("speech")) {
-      return {
-        text: "I've prepared a voice script for you:\n\nHello there! This is a demonstration of AI-generated voice content. In a full implementation, this text would be converted to natural-sounding speech using advanced text-to-speech technology. The voice could be customized for tone, pace, and style to match your specific needs. Voice generation can be used for audiobooks, podcasts, educational content, or even personalized messages.",
-        contentType: "voice"
-      };
-    } else {
-      return {
-        text: "Here's the content I've generated based on your request:\n\n\"Artificial Intelligence has transformed from a theoretical concept to an essential part of our daily lives. From the moment we wake up and check our personalized news feeds to the recommendations we receive while shopping online, AI systems are working behind the scenes to enhance our experiences. These systems continuously learn from vast amounts of data, allowing them to improve over time and provide increasingly relevant and helpful interactions.\n\nUnlike traditional software that follows pre-programmed instructions, modern AI can adapt to new situations and make decisions based on patterns it has identified. This flexibility makes it valuable across countless industries, from healthcare where it helps diagnose diseases to agriculture where it optimizes crop yields.\"",
-        contentType: "text"
-      };
-    }
-  }
-  
-  // General knowledge about AI
-  if (lowercaseInput.includes("what is ai") || lowercaseInput.includes("artificial intelligence")) {
-    return {
-      text: "Artificial Intelligence (AI) refers to computer systems designed to perform tasks that typically require human intelligence. These include learning, reasoning, problem-solving, perception, and language understanding.\n\nAI technologies can be categorized into:\n\n- **Narrow AI**: Systems designed for a specific task (like voice assistants)\n- **General AI**: Systems with human-like capabilities across different domains (still theoretical)\n- **Machine Learning**: AI systems that improve through experience\n- **Deep Learning**: Advanced ML using neural networks with multiple layers\n\nAI powers many tools we use daily, from recommendation systems on streaming platforms to voice assistants and advanced search engines.",
-      contentType: "text"
-    };
-  }
-  
-  // Advanced pattern matching for code generation
-  if (lowercaseInput.includes("code") || lowercaseInput.includes("program") || lowercaseInput.includes("function")) {
-    return {
-      text: "Here's a code sample based on your request:\n\n```javascript\n// Simple AI model for sentiment analysis\nclass SentimentAnalyzer {\n  constructor() {\n    // Pre-defined sentiment dictionaries\n    this.positiveWords = ['good', 'great', 'excellent', 'happy', 'positive', 'wonderful', 'love'];\n    this.negativeWords = ['bad', 'awful', 'terrible', 'sad', 'negative', 'horrible', 'hate'];\n  }\n\n  analyze(text) {\n    const words = text.toLowerCase().split(/\\W+/);\n    let positiveScore = 0;\n    let negativeScore = 0;\n    \n    words.forEach(word => {\n      if (this.positiveWords.includes(word)) positiveScore++;\n      if (this.negativeWords.includes(word)) negativeScore++;\n    });\n    \n    const overallScore = positiveScore - negativeScore;\n    \n    return {\n      score: overallScore,\n      sentiment: overallScore > 0 ? 'positive' : \n                overallScore < 0 ? 'negative' : 'neutral',\n      positiveWords: words.filter(word => this.positiveWords.includes(word)),\n      negativeWords: words.filter(word => this.negativeWords.includes(word))\n    };\n  }\n}\n\n// Example usage\nconst analyzer = new SentimentAnalyzer();\nconst result = analyzer.analyze('I really love this amazing product, but the delivery was terrible.');\nconsole.log(result);\n```\n\nThis is a simple sentiment analyzer implementation in JavaScript. In a production environment, you would want to use more sophisticated models with larger dictionaries and weighting systems.",
-      contentType: "text"
-    };
-  }
-  
-  // Simple pattern matching for different queries
-  if (lowercaseInput.includes("hello") || lowercaseInput.includes("hi")) {
-    return {
-      text: "Hello! I'm your AI assistant. I can help you generate content, answer questions, or provide information on various topics. What would you like to create today? I can help with text, documents, video scripts, or voice content.",
-      contentType: "text"
-    };
-  } else if (lowercaseInput.includes("help") || lowercaseInput.includes("assistance") || lowercaseInput.includes("what can you do")) {
-    return {
-      text: "I'm here to help with various tasks:\n\n- Generate text content for articles, blogs, or social media\n- Create document outlines and reports\n- Develop video scripts and storyboards\n- Write voice scripts for audio content\n- Answer questions about AI and technology\n- Provide code samples and explanations\n- Assist with problem-solving and ideation\n\nJust let me know what you'd like to work on, and I'll do my best to assist!",
-      contentType: "text"
-    };
-  } else if (lowercaseInput.includes("thank")) {
-    return {
-      text: "You're welcome! I'm glad I could help. Is there anything else you'd like to know or create today?",
-      contentType: "text"
-    };
-  }
-  
-  // Default response with more AI capabilities
-  const responses = [
-    "I can help you create various types of content including text, documents, video scripts, and voice recordings. What specific type of content would you like to generate?",
-    "Based on your message, I can offer several AI-powered solutions. Would you like me to generate written content, create a document structure, develop a video script, or prepare audio content?",
-    "I'm designed to assist with content creation across multiple formats. I can help with text generation, document preparation, video scripting, or voice content. Which would be most helpful for your current needs?",
-    "As an AI assistant, I can generate text content, create document outlines, develop video scripts, or prepare voice recordings. How can I best help with your specific requirements?",
-    "I'd be happy to assist with your content needs. My capabilities include generating text, creating document structures, developing video scripts, and preparing voice content. What type of content would you like to focus on?"
-  ];
-  
-  return {
-    text: responses[Math.floor(Math.random() * responses.length)],
-    contentType: "text"
-  };
-};
-
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(() => {
+    // Initialize from localStorage if available
+    return localStorage.getItem("openai_api_key");
+  });
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState("");
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -106,6 +45,13 @@ export default function Chat() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // Check if API key is set when component loads
+  useEffect(() => {
+    if (!apiKey) {
+      setShowApiKeyDialog(true);
+    }
+  }, [apiKey]);
   
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,20 +71,19 @@ export default function Chat() {
     setInput("");
     setIsLoading(true);
     
-    // Process the message with our enhanced AI function
-    setTimeout(() => {
-      const response = processAIResponse(userMessage.content);
+    try {
+      // Generate AI response using OpenAI API or fallback
+      const response = await generateAIResponse(userMessage.content, apiKey);
       
       const aiMessage: Message = {
         id: Date.now().toString(),
         content: response.text,
         role: "assistant",
         timestamp: new Date(),
-        contentType: response.contentType || "text"
+        contentType: response.contentType
       };
       
       setMessages((prev) => [...prev, aiMessage]);
-      setIsLoading(false);
       
       // Notify user about the content type generated
       if (response.contentType && response.contentType !== "text") {
@@ -147,7 +92,15 @@ export default function Chat() {
           description: `The AI has created ${response.contentType} content for you.`,
         });
       }
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate AI response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const clearChat = () => {
@@ -174,6 +127,33 @@ export default function Chat() {
         return null;
     }
   };
+
+  const saveApiKey = () => {
+    if (tempApiKey.trim()) {
+      localStorage.setItem("openai_api_key", tempApiKey);
+      setApiKey(tempApiKey);
+      setShowApiKeyDialog(false);
+      toast({
+        title: "API Key Saved",
+        description: "Your OpenAI API key has been saved locally.",
+      });
+    } else {
+      toast({
+        title: "Invalid API Key",
+        description: "Please enter a valid OpenAI API key.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const removeApiKey = () => {
+    localStorage.removeItem("openai_api_key");
+    setApiKey(null);
+    toast({
+      title: "API Key Removed",
+      description: "Your OpenAI API key has been removed.",
+    });
+  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -183,11 +163,21 @@ export default function Chat() {
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">AI Assistant</h1>
-            {messages.length > 0 && (
-              <Button variant="outline" size="sm" onClick={clearChat}>
-                <X className="h-4 w-4 mr-2" /> Clear Chat
+            <div className="flex gap-2">
+              {messages.length > 0 && (
+                <Button variant="outline" size="sm" onClick={clearChat}>
+                  <X className="h-4 w-4 mr-2" /> Clear Chat
+                </Button>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowApiKeyDialog(true)}
+              >
+                <Key className="h-4 w-4 mr-2" /> 
+                {apiKey ? "Change API Key" : "Set API Key"}
               </Button>
-            )}
+            </div>
           </div>
           
           <div className="border border-border bg-background rounded-lg min-h-[60vh] flex flex-col">
@@ -199,6 +189,15 @@ export default function Chat() {
                   <p className="text-sm text-foreground/60 max-w-md mt-2">
                     Ask me anything! I can generate text, documents, video scripts, voice content, and more.
                   </p>
+                  {!apiKey && (
+                    <Button 
+                      variant="outline" 
+                      className="mt-4" 
+                      onClick={() => setShowApiKeyDialog(true)}
+                    >
+                      <Key className="h-4 w-4 mr-2" /> Set OpenAI API Key
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -278,7 +277,7 @@ export default function Chat() {
                   className="flex-1"
                   disabled={isLoading}
                 />
-                <Button type="submit" disabled={isLoading || !input.trim()}>
+                <Button type="submit" disabled={isLoading || !input.trim() || !apiKey}>
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -288,12 +287,65 @@ export default function Chat() {
               </form>
               <div className="text-xs text-center mt-3 text-foreground/50 flex justify-center items-center gap-1">
                 <Sparkles className="h-3 w-3" /> 
-                AI powered by advanced language models
+                {apiKey ? "Using OpenAI API for enhanced responses" : "Using simulated responses (Set API key for enhanced capabilities)"}
               </div>
             </div>
           </div>
         </div>
       </main>
+      
+      <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>OpenAI API Key</DialogTitle>
+            <DialogDescription>
+              Enter your OpenAI API key to enable AI-powered responses.
+              Your key is stored locally in your browser and never sent to our servers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="api-key" className="text-right">
+                API Key
+              </Label>
+              <Input
+                id="api-key"
+                type="password"
+                value={tempApiKey}
+                onChange={(e) => setTempApiKey(e.target.value)}
+                placeholder="sk-..."
+                className="col-span-3"
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Get your API key from the{" "}
+              <a 
+                href="https://platform.openai.com/api-keys" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                OpenAI dashboard
+              </a>
+              . If you don't provide a key, the app will use simulated responses.
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-between">
+            {apiKey && (
+              <Button 
+                type="button" 
+                variant="destructive" 
+                onClick={removeApiKey}
+              >
+                Remove Key
+              </Button>
+            )}
+            <Button type="button" onClick={saveApiKey}>
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
