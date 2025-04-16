@@ -345,4 +345,4 @@ if (response.contentType !== "text") {
       <Footer />
     </div>
   );
-};
+}
