@@ -4,9 +4,20 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Send, Bot, User, ArrowDown, X, Loader2, Video, FileText, Volume2 } from "lucide-react";
+import { Sparkles, Send, Bot, User, ArrowDown, X, Loader2, Video, FileText, Volume2, Key } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { generateAIResponse } from "@/utils/openai";
 
 type Message = {
   id: string;
@@ -17,11 +28,16 @@ type Message = {
 };
 
 
-
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(() => {
+    // Initialize from localStorage if available
+    return localStorage.getItem("openai_api_key");
+  });
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState("");
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -31,6 +47,13 @@ export default function Chat() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // Check if API key is set when component loads
+  useEffect(() => {
+    if (!apiKey) {
+      setShowApiKeyDialog(true);
+    }
+  }, [apiKey]);
   
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +73,7 @@ export default function Chat() {
     setInput("");
     setIsLoading(true);
     
+
    // NEW: Use real AI API call
 const response = await generateAIResponse(userMessage.content, import.meta.env.VITE_OPENAI_API_KEY || null)
 
@@ -71,6 +95,7 @@ if (response.contentType !== "text") {
     description: `AI created ${response.contentType} content.`,
   })
 }
+
 
   
   const clearChat = () => {
@@ -97,6 +122,33 @@ if (response.contentType !== "text") {
         return null;
     }
   };
+
+  const saveApiKey = () => {
+    if (tempApiKey.trim()) {
+      localStorage.setItem("openai_api_key", tempApiKey);
+      setApiKey(tempApiKey);
+      setShowApiKeyDialog(false);
+      toast({
+        title: "API Key Saved",
+        description: "Your OpenAI API key has been saved locally.",
+      });
+    } else {
+      toast({
+        title: "Invalid API Key",
+        description: "Please enter a valid OpenAI API key.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const removeApiKey = () => {
+    localStorage.removeItem("openai_api_key");
+    setApiKey(null);
+    toast({
+      title: "API Key Removed",
+      description: "Your OpenAI API key has been removed.",
+    });
+  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -106,11 +158,21 @@ if (response.contentType !== "text") {
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">AI Assistant</h1>
-            {messages.length > 0 && (
-              <Button variant="outline" size="sm" onClick={clearChat}>
-                <X className="h-4 w-4 mr-2" /> Clear Chat
+            <div className="flex gap-2">
+              {messages.length > 0 && (
+                <Button variant="outline" size="sm" onClick={clearChat}>
+                  <X className="h-4 w-4 mr-2" /> Clear Chat
+                </Button>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowApiKeyDialog(true)}
+              >
+                <Key className="h-4 w-4 mr-2" /> 
+                {apiKey ? "Change API Key" : "Set API Key"}
               </Button>
-            )}
+            </div>
           </div>
           
           <div className="border border-border bg-background rounded-lg min-h-[60vh] flex flex-col">
@@ -122,6 +184,15 @@ if (response.contentType !== "text") {
                   <p className="text-sm text-foreground/60 max-w-md mt-2">
                     Ask me anything! I can generate text, documents, video scripts, voice content, and more.
                   </p>
+                  {!apiKey && (
+                    <Button 
+                      variant="outline" 
+                      className="mt-4" 
+                      onClick={() => setShowApiKeyDialog(true)}
+                    >
+                      <Key className="h-4 w-4 mr-2" /> Set OpenAI API Key
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -201,7 +272,7 @@ if (response.contentType !== "text") {
                   className="flex-1"
                   disabled={isLoading}
                 />
-                <Button type="submit" disabled={isLoading || !input.trim()}>
+                <Button type="submit" disabled={isLoading || !input.trim() || !apiKey}>
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -211,12 +282,65 @@ if (response.contentType !== "text") {
               </form>
               <div className="text-xs text-center mt-3 text-foreground/50 flex justify-center items-center gap-1">
                 <Sparkles className="h-3 w-3" /> 
-                AI powered by advanced language models
+                {apiKey ? "Using OpenAI API for enhanced responses" : "Using simulated responses (Set API key for enhanced capabilities)"}
               </div>
             </div>
           </div>
         </div>
       </main>
+      
+      <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>OpenAI API Key</DialogTitle>
+            <DialogDescription>
+              Enter your OpenAI API key to enable AI-powered responses.
+              Your key is stored locally in your browser and never sent to our servers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="api-key" className="text-right">
+                API Key
+              </Label>
+              <Input
+                id="api-key"
+                type="password"
+                value={tempApiKey}
+                onChange={(e) => setTempApiKey(e.target.value)}
+                placeholder="sk-..."
+                className="col-span-3"
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Get your API key from the{" "}
+              <a 
+                href="https://platform.openai.com/api-keys" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                OpenAI dashboard
+              </a>
+              . If you don't provide a key, the app will use simulated responses.
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-between">
+            {apiKey && (
+              <Button 
+                type="button" 
+                variant="destructive" 
+                onClick={removeApiKey}
+              >
+                Remove Key
+              </Button>
+            )}
+            <Button type="button" onClick={saveApiKey}>
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
