@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { generateAIResponse } from "@/utils/openai";
+import { generateAIResponse } from "@/utils/openai.js";
 import { Message } from "@/types";
 
 export default function Chat() {
