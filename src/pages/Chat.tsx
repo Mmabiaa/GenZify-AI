@@ -59,10 +59,10 @@ export default function Chat() {
     setInput("");
     setIsLoading(true);
 
-    const response = await generateAIResponse(
-      userMessage.content,
-      import.meta.env.VITE_OPENAI_API_KEY || null
-    );
+  const response = await generateAIResponse(
+  userMessage.content,
+  apiKey
+  );
 
     const aiMessage: Message = {
       id: Date.now().toString(),
