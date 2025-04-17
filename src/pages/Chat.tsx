@@ -60,8 +60,7 @@ export default function Chat() {
     setIsLoading(true);
 
   const response = await generateAIResponse(
-  userMessage.content,
-  apiKey
+  userMessage.content
   );
 
     const aiMessage: Message = {
