@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { generateAIResponse } from "@/utils/openai";
+import { generateAIResponse } from "@/utils/openai.js";
 import { Message } from "@/types";
 
 export default function Chat() {
@@ -59,10 +59,10 @@ export default function Chat() {
     setInput("");
     setIsLoading(true);
 
-    const response = await generateAIResponse(
-      userMessage.content,
-      import.meta.env.VITE_OPENAI_API_KEY || null
-    );
+  const response = await generateAIResponse(
+  userMessage.content,
+  apiKey
+  );
 
     const aiMessage: Message = {
       id: Date.now().toString(),
