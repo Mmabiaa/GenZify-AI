@@ -1,14 +1,19 @@
 
-export async function generateAIResponse(prompt) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY || localStorage.getItem("openai_api_key");
+import { apiService } from "@/services/apiService";
+import { errorHandler } from "@/utils/errorHandler";
+import appConfig from "@/config/appConfig";
+import { AIResponse } from "@/types";
+
+export async function generateAIResponse(prompt: string): Promise<AIResponse> {
+  const apiKey = apiService.getApiKey();
 
   if (!apiKey) {
-    console.warn("No API key found in environment or localStorage. Using simulated response.");
+    console.warn("No API key found. Using simulated response.");
     return new Promise((resolve) =>
       setTimeout(() =>
         resolve({
           text: `Simulated response: "${prompt}"`,
-          contentType: "text",
+          contentType: determineContentType(prompt),
         }),
         1000
       )
@@ -16,17 +21,20 @@ export async function generateAIResponse(prompt) {
   }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
+    const response = await apiService.fetchWithTimeout(
+      appConfig.apiEndpoints.openai, 
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: appConfig.defaultModel,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -38,19 +46,19 @@ export async function generateAIResponse(prompt) {
 
     return {
       text,
-      contentType: "text",
+      contentType: determineContentType(prompt),
     };
   } catch (error) {
-    console.error("OpenAI error:", error);
+    errorHandler.handle(error, "AI Response Generation");
     return {
-      text: `Error generating response: ${error.message}. Please verify your API key and try again.`,
+      text: `Error generating response: ${error instanceof Error ? error.message : 'Unknown error'}. Please verify your API key and try again.`,
       contentType: "text",
     };
   }
 }
 
 // Function to determine content type from prompt
-export function determineContentType(prompt) {
+export function determineContentType(prompt: string): "text" | "video" | "document" | "voice" {
   const prompt_lower = prompt.toLowerCase();
   
   // Check for video content request
