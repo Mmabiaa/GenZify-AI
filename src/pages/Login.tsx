@@ -1,10 +1,10 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, Github, Chrome, AtSign, Lock } from "lucide-react";
+import { LogIn, Github, Chrome, AtSign, Lock, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { z } from "zod";
@@ -20,6 +20,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const loginSchema = z.object({
   email: z.string().email({
@@ -37,6 +39,8 @@ export default function Login() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { login, loginWithGoogle, loginWithGithub } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -48,6 +52,9 @@ export default function Login() {
   });
 
   async function onSubmit(data: LoginFormValues) {
+    setIsLoading(true);
+    setAuthError(null);
+    
     try {
       await login(data.email, data.password);
       
@@ -58,33 +65,33 @@ export default function Login() {
       
       // Navigate to dashboard after successful login
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
+      setAuthError(error.message || "Invalid email or password.");
       toast({
         title: "Login failed",
-        description: "Invalid email or password.",
+        description: error.message || "Invalid email or password.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const handleSocialLogin = async (provider: string) => {
+    setAuthError(null);
     try {
       if (provider === "Google") {
         await loginWithGoogle();
+        // The redirect will happen automatically
       } else if (provider === "GitHub") {
         await loginWithGithub();
+        // The redirect will happen automatically
       }
-      
-      toast({
-        title: "Login successful",
-        description: `Welcome to GenZify! You are now signed in with ${provider}.`,
-      });
-      
-      navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
+      setAuthError(error.message || `Could not authenticate with ${provider}.`);
       toast({
         title: "Authentication failed",
-        description: `Could not authenticate with ${provider}.`,
+        description: error.message || `Could not authenticate with ${provider}.`,
         variant: "destructive",
       });
     }
@@ -103,6 +110,13 @@ export default function Login() {
             </p>
           </div>
           
+          {authError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{authError}</AlertDescription>
+            </Alert>
+          )}
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -119,6 +133,7 @@ export default function Login() {
                           type="email"
                           className="pl-10"
                           {...field}
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -146,6 +161,7 @@ export default function Login() {
                           type="password"
                           className="pl-10"
                           {...field}
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -163,6 +179,7 @@ export default function Login() {
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        disabled={isLoading}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
@@ -174,8 +191,16 @@ export default function Login() {
                 )}
               />
               
-              <Button type="submit" className="w-full">
-                <LogIn className="w-4 h-4 mr-2" /> Sign In
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Signing In...
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-4 h-4 mr-2" /> Sign In
+                  </>
+                )}
               </Button>
             </form>
           </Form>
@@ -190,10 +215,22 @@ export default function Login() {
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" type="button" onClick={() => handleSocialLogin("Google")} className="w-full">
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={() => handleSocialLogin("Google")} 
+              className="w-full"
+              disabled={isLoading}
+            >
               <Chrome className="w-4 h-4 mr-2" /> Google
             </Button>
-            <Button variant="outline" type="button" onClick={() => handleSocialLogin("GitHub")} className="w-full">
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={() => handleSocialLogin("GitHub")} 
+              className="w-full"
+              disabled={isLoading}
+            >
               <Github className="w-4 h-4 mr-2" /> GitHub
             </Button>
           </div>

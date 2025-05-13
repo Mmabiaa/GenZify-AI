@@ -1,12 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
+import supabase from "@/lib/supabaseClient";
+import { useToast } from "@/hooks/use-toast";
+import { User } from "@/types";
+import { Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
@@ -16,7 +13,7 @@ interface AuthContextType {
   signUp: (name: string, email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   loginWithGithub: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,33 +21,124 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Check local storage for user data on initial load
+  // Check for existing session on initial load
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    const checkSession = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error.message);
+        } else if (data?.session) {
+          await handleSessionChange(data.session);
+        }
+      } catch (error) {
+        console.error("Failed to get session:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
+
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
+          await handleSessionChange(session);
+        } else {
+          setUser(null);
+        }
+      }
+    );
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  // Handle session change by fetching user profile data
+  const handleSessionChange = async (session: Session) => {
+    try {
+      const { user: authUser } = session;
+      
+      if (!authUser) return;
+
+      // First check if a profile exists
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      // If profile exists, use it
+      if (profileData) {
+        setUser({
+          id: authUser.id,
+          name: profileData.full_name || authUser.email?.split('@')[0] || 'User',
+          email: authUser.email || '',
+          avatar: profileData.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.email}`,
+        });
+      } else if (profileError && profileError.code !== 'PGRST116') {
+        // If error is not "not found", log it
+        console.error("Error fetching profile:", profileError);
+        
+        // Create basic user with auth data
+        setUser({
+          id: authUser.id,
+          name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+          email: authUser.email || '',
+          avatar: authUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.email}`,
+        });
+        
+        // Create new profile
+        await supabase.from('profiles').insert({
+          id: authUser.id,
+          full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+          email: authUser.email,
+          avatar_url: authUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.email}`,
+        });
+      } else {
+        // No profile found, create basic user with auth data
+        setUser({
+          id: authUser.id,
+          name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+          email: authUser.email || '',
+          avatar: authUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.email}`,
+        });
+        
+        // Create new profile
+        await supabase.from('profiles').insert({
+          id: authUser.id,
+          full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+          email: authUser.email,
+          avatar_url: authUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.email}`,
+        });
+      }
+    } catch (error) {
+      console.error("Error handling session change:", error);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // In a real app, this would call an API endpoint to validate credentials
-      // For demo purposes, we'll create a mock user
-      const mockUser: User = {
-        id: "user123",
-        name: email.split('@')[0],
-        email: email,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-      };
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
       
-      // Store user data in local storage
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      setUser(mockUser);
       return Promise.resolve();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login error:", error.message);
       return Promise.reject(error);
     } finally {
       setIsLoading(false);
@@ -60,20 +148,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      // In a real app, this would call an API endpoint to create a user
-      // For demo purposes, we'll create a mock user
-      const mockUser: User = {
-        id: "user" + Math.floor(Math.random() * 10000),
-        name: name,
-        email: email,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-      };
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
       
-      // Store user data in local storage
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      setUser(mockUser);
+      // Note: User won't be set immediately as they need to confirm email
+      toast({
+        title: "Verification email sent",
+        description: "Please check your email to complete your registration.",
+      });
+      
       return Promise.resolve();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Signup error:", error.message);
       return Promise.reject(error);
     } finally {
       setIsLoading(false);
@@ -81,55 +178,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithGoogle = async () => {
-    setIsLoading(true);
     try {
-      // In a real app, this would redirect to Google OAuth
-      // For demo purposes, we'll create a mock user
-      const mockUser: User = {
-        id: "googleuser" + Math.floor(Math.random() * 10000),
-        name: "Google User",
-        email: "google.user@example.com",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=google",
-      };
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        }
+      });
       
-      // Store user data in local storage
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      setUser(mockUser);
+      if (error) {
+        throw error;
+      }
+      
       return Promise.resolve();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Google login error:", error.message);
       return Promise.reject(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const loginWithGithub = async () => {
-    setIsLoading(true);
     try {
-      // In a real app, this would redirect to GitHub OAuth
-      // For demo purposes, we'll create a mock user
-      const mockUser: User = {
-        id: "githubuser" + Math.floor(Math.random() * 10000),
-        name: "GitHub User",
-        email: "github.user@example.com",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=github",
-      };
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        }
+      });
       
-      // Store user data in local storage
-      localStorage.setItem("user", JSON.stringify(mockUser));
-      setUser(mockUser);
+      if (error) {
+        throw error;
+      }
+      
       return Promise.resolve();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("GitHub login error:", error.message);
       return Promise.reject(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    // Remove user data from local storage
-    localStorage.removeItem("user");
-    setUser(null);
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
+      setUser(null);
+    } catch (error: any) {
+      console.error("Logout error:", error.message);
+    }
   };
 
   return (

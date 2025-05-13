@@ -1,10 +1,10 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { AtSign, Lock, User, Github, Chrome, UserPlus } from "lucide-react";
+import { AtSign, Lock, User, Github, Chrome, UserPlus, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { z } from "zod";
@@ -20,6 +20,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const signUpSchema = z.object({
   name: z.string().min(2, {
@@ -42,6 +44,9 @@ export default function SignUp() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { signUp, loginWithGoogle, loginWithGithub } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [verificationSent, setVerificationSent] = useState(false);
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -54,47 +59,70 @@ export default function SignUp() {
   });
 
   async function onSubmit(data: SignUpFormValues) {
+    setIsLoading(true);
+    setAuthError(null);
+    
     try {
       await signUp(data.name, data.email, data.password);
+      setVerificationSent(true);
       
       toast({
-        title: "Account created",
-        description: `Welcome, ${data.name}! Your account has been created.`,
+        title: "Verification email sent",
+        description: "Please check your email to confirm your account.",
       });
-      
-      // Navigate to dashboard after successful signup
-      navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
+      setAuthError(error.message || "There was a problem creating your account.");
       toast({
         title: "Sign up failed",
-        description: "There was a problem creating your account.",
+        description: error.message || "There was a problem creating your account.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const handleSocialSignUp = async (provider: string) => {
+    setAuthError(null);
     try {
       if (provider === "Google") {
         await loginWithGoogle();
+        // The redirect will happen automatically
       } else if (provider === "GitHub") {
         await loginWithGithub();
+        // The redirect will happen automatically
       }
-      
-      toast({
-        title: "Account created",
-        description: `Welcome to GenZify! You are now signed in with ${provider}.`,
-      });
-      
-      navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
+      setAuthError(error.message || `Could not authenticate with ${provider}.`);
       toast({
         title: "Authentication failed",
-        description: `Could not authenticate with ${provider}.`,
+        description: error.message || `Could not authenticate with ${provider}.`,
         variant: "destructive",
       });
     }
   };
+
+  if (verificationSent) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        
+        <main className="flex-1 flex items-center justify-center py-12">
+          <div className="w-full max-w-md p-8 space-y-8 bg-background border border-border rounded-xl shadow-sm text-center">
+            <h1 className="text-2xl font-bold">Check your email</h1>
+            <p className="text-foreground/70">
+              We've sent a verification link to your email address. Please check your inbox and click the link to complete your registration.
+            </p>
+            <Button asChild className="mt-4">
+              <Link to="/login">Return to Login</Link>
+            </Button>
+          </div>
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -108,6 +136,13 @@ export default function SignUp() {
               Sign up to access all GenZify AI features
             </p>
           </div>
+          
+          {authError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{authError}</AlertDescription>
+            </Alert>
+          )}
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -124,6 +159,7 @@ export default function SignUp() {
                           placeholder="Your name"
                           className="pl-10"
                           {...field}
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -146,6 +182,7 @@ export default function SignUp() {
                           type="email"
                           className="pl-10"
                           {...field}
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -168,6 +205,7 @@ export default function SignUp() {
                           type="password"
                           className="pl-10"
                           {...field}
+                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -185,6 +223,7 @@ export default function SignUp() {
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        disabled={isLoading}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
@@ -197,8 +236,16 @@ export default function SignUp() {
                 )}
               />
               
-              <Button type="submit" className="w-full">
-                <UserPlus className="w-4 h-4 mr-2" /> Create Account
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating Account...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4 mr-2" /> Create Account
+                  </>
+                )}
               </Button>
             </form>
           </Form>
@@ -213,10 +260,22 @@ export default function SignUp() {
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" type="button" onClick={() => handleSocialSignUp("Google")} className="w-full">
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={() => handleSocialSignUp("Google")} 
+              className="w-full"
+              disabled={isLoading}
+            >
               <Chrome className="w-4 h-4 mr-2" /> Google
             </Button>
-            <Button variant="outline" type="button" onClick={() => handleSocialSignUp("GitHub")} className="w-full">
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={() => handleSocialSignUp("GitHub")} 
+              className="w-full"
+              disabled={isLoading}
+            >
               <Github className="w-4 h-4 mr-2" /> GitHub
             </Button>
           </div>

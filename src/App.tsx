@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Chat from "./pages/Chat";
 import ContentGenerator from "./pages/ContentGenerator";
@@ -38,10 +39,26 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/content-generator" element={<ContentGenerator />} />
-              <Route path="/voice" element={<Voice />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/chat" element={
+                <ProtectedRoute>
+                  <Chat />
+                </ProtectedRoute>
+              } />
+              <Route path="/content-generator" element={
+                <ProtectedRoute>
+                  <ContentGenerator />
+                </ProtectedRoute>
+              } />
+              <Route path="/voice" element={
+                <ProtectedRoute>
+                  <Voice />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
               <Route path="/about" element={<About />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />

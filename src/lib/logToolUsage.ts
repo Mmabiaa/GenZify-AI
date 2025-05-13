@@ -1,5 +1,5 @@
 
-import supabase from './supabaseClient'
+import supabase from './supabaseClient';
 
 export async function logToolUsage(tool_name: string, user_id: string) {
   // Ensure Supabase is properly initialized
@@ -11,18 +11,18 @@ export async function logToolUsage(tool_name: string, user_id: string) {
   try {
     const { error } = await supabase
       .from('tool_usage')
-      .insert([{ tool_name, user_id, timestamp: new Date() }])
+      .insert([{ tool_name, user_id, timestamp: new Date().toISOString() }]);
 
     if (error) {
-      console.error('Error logging tool usage:', error)
-      return false
+      console.error('Error logging tool usage:', error);
+      return false;
     }
 
-    console.log('Tool usage logged successfully.')
-    return true
+    console.log('Tool usage logged successfully.');
+    return true;
   } catch (error) {
-    console.error('Exception when logging tool usage:', error)
-    return false
+    console.error('Exception when logging tool usage:', error);
+    return false;
   }
 }
 
@@ -34,16 +34,16 @@ export async function logToolUsageAuto(tool_name: string) {
   }
 
   try {
-    const { data: { user }, error } = await supabase.auth.getUser()
+    const { data: session } = await supabase.auth.getSession();
 
-    if (error || !user) {
-      console.error('User not authenticated or error getting user')
-      return false
+    if (!session || !session.session || !session.session.user) {
+      console.warn('User not authenticated, skipping tool usage logging');
+      return false;
     }
 
-    return await logToolUsage(tool_name, user.id)
+    return await logToolUsage(tool_name, session.session.user.id);
   } catch (error) {
-    console.error('Exception when auto-logging tool usage:', error)
-    return false
+    console.error('Exception when auto-logging tool usage:', error);
+    return false;
   }
 }
